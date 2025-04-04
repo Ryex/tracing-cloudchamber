@@ -1,0 +1,22 @@
+[package]
+name = "tracing-cloudchamber"
+version = "0.1.0"
+edition = "2024"
+resolver = "2"
+links = "tracing-cloudchamber"
+
+[lib]
+path = "src/lib.rs"
+crate-type = ["staticlib"]
+
+[dependencies]
+cxx = { version = "1.0", features = [ "c++17"] }
+# tracing = "0.1"
+# tracing-core = "0.1"
+tracing = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+tracing-core = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+[build-dependencies]
+cxx-build = { version = "1.0", features = ["parallel"] }
+
+[dev-dependencies]
+tracing-mock = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
