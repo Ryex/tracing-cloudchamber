@@ -11,12 +11,15 @@ crate-type = ["staticlib"]
 
 [dependencies]
 cxx = { version = "1.0", features = [ "c++17"] }
-# tracing = "0.1"
-# tracing-core = "0.1"
-tracing = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
-tracing-core = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+tracing = "0.1"
+tracing-core = "0.1"
+# tracing = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+# tracing-core = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+valuable = "0.1"
+
 [build-dependencies]
 cxx-build = { version = "1.0", features = ["parallel"] }
 
 [dev-dependencies]
-tracing-mock = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+# tracing-mock = { git = "https://github.com/tokio-rs/tracing", tag = "tracing-core-0.1.33", version = "0.1" }
+tracing-mock = "0.1.0-beta.1"

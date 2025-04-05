@@ -1,7 +1,11 @@
 #pragma once
 
+#include <functional>
 #include <iostream>
+#include <memory>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "tracing-cloudchamber/src/lib.rs.h"
@@ -9,16 +13,16 @@
 namespace cloudchamber {
 
 namespace level {
-static const Level ERROR = Level{LevelValue::ERROR};
-static const Level WARN = Level{LevelValue::WARN};
-static const Level INFO = Level{LevelValue::INFO};
-static const Level DEBUG = Level{LevelValue::DEBUG};
-static const Level TRACE = Level{LevelValue::TRACE};
+static const Level ERROR = Level{::cloudchamber::detail::LevelValue::ERROR};
+static const Level WARN = Level{::cloudchamber::detail::LevelValue::WARN};
+static const Level INFO = Level{::cloudchamber::detail::LevelValue::INFO};
+static const Level DEBUG = Level{::cloudchamber::detail::LevelValue::DEBUG};
+static const Level TRACE = Level{::cloudchamber::detail::LevelValue::TRACE};
 } // namespace level
 namespace kind {
-static const Kind EVENT = Kind{KindValue::EVENT};
-static const Kind SPAN = Kind{KindValue::SPAN};
-static const Kind HINT = Kind{KindValue::HINT};
+static const Kind EVENT = Kind{::cloudchamber::detail::KindValue::EVENT};
+static const Kind SPAN = Kind{::cloudchamber::detail::KindValue::SPAN};
+static const Kind HINT = Kind{::cloudchamber::detail::KindValue::HINT};
 } // namespace kind
 
 namespace detail {
@@ -62,32 +66,17 @@ constexpr std::string_view __QUALIFIED_FUNCTION(T &&name) {
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
-void print_type() {
+#if !defined(TOKENPASTE_TCH) && !defined(TOKENPASTE_TCH2)
+#define TOKENPASTE_TCH(x, y) x##y
+#define TOKENPASTE_TCH2(x, y) TOKENPASTE_TCH(x, y)
+#endif
 
-  static std::array<const ::rust::Str, 3> __FIELDS = {};
-  static ::cloudchamber::Metadata __META{
-      ::rust::Str("print_type.event"),
-      ::rust::Str(
-          ::cloudchamber::detail::__QUALIFIED_FUNCTION(__PRETTY_FUNCTION__)
-              .cbegin()),
-      ::cloudchamber::level::INFO,
-      ::rust::Str(__FILE__),
-      int32_t(__LINE__),
-      ::rust::Slice<const ::rust::Str>(__FIELDS),
-      nullptr,
-      ::cloudchamber::Kind{::cloudchamber::KindValue::EVENT}};
-  static ::cloudchamber::Callsite __CALLSITE(__META);
-  __META.callsite = &__CALLSITE;
-  constexpr std::string_view _func =
-      ::cloudchamber::detail::__QUALIFIED_FUNCTION(__PRETTY_FUNCTION__);
-  std::cout << "raw" << _func << std::endl;
-}
-
-#ifndef tchEvent
-#define tchEvent(level, name)                                                  \
-  static std::vector<::rust::Str> __FIELDS = {};                               \
-  std::cout << "Callsite was created" << std::endl;                            \
-  static ::cloudchamber::Metadata __META{                                      \
+#ifndef __tch_callsite
+#define __tch_callsite(level, name, ...)                                       \
+  static ::cloudchamber::Callsite TOKENPASTE_TCH2(__CALLSITE_, __LINE__) = {}; \
+  static std::vector<::rust::Str> TOKENPASTE_TCH2(__FIELDS_,                   \
+                                                  __LINE__) = {__VA_ARGS__};   \
+  static ::cloudchamber::Metadata TOKENPASTE_TCH2(__META_, __LINE__){          \
       ::rust::Str(name),                                                       \
       ::rust::Str(                                                             \
           ::cloudchamber::detail::__QUALIFIED_FUNCTION(__PRETTY_FUNCTION__)    \
@@ -95,20 +84,41 @@ void print_type() {
       level,                                                                   \
       ::rust::Str(__FILE__),                                                   \
       int32_t(__LINE__),                                                       \
-      ::rust::Slice<const ::rust::Str>(__FIELDS),                              \
-      nullptr,                                                                 \
-      ::cloudchamber::Kind{::cloudchamber::KindValue::EVENT}};                 \
-  static ::cloudchamber::Callsite __CALLSITE(__META);                          \
-  __META.callsite = &__CALLSITE;                                               \
-  bool __CALLSITE_ENABLED = level.is_enabled();                                \
-  if (__CALLSITE_ENABLED) {                                                    \
-    std::cout << "Callsite was high enough level" << std::endl;                \
-    __CALLSITE_ENABLED = __CALLSITE.is_enabled();                              \
-  }                                                                            \
-  if (__CALLSITE_ENABLED) {                                                    \
-    /* push fields */                                                          \
-    std::cout << "Callsite was enabled" << std::endl;                          \
-    ::cloudchamber::dispatch_tracing_event(__CALLSITE.get_meta());             \
+      ::rust::Slice<const ::rust::Str>(TOKENPASTE_TCH2(__FIELDS_, __LINE__)),  \
+      TOKENPASTE_TCH2(__CALLSITE_, __LINE__),                                  \
+      ::cloudchamber::Kind{::cloudchamber::detail::KindValue::EVENT}};         \
+  TOKENPASTE_TCH2(__CALLSITE_, __LINE__).meta =                                \
+      &TOKENPASTE_TCH2(__META_, __LINE__);                                     \
+  bool TOKENPASTE_TCH2(__CALLSITE_ENABLED_, __LINE__) = level.is_enabled();    \
+  if (TOKENPASTE_TCH2(__CALLSITE_ENABLED_, __LINE__)) {                        \
+    TOKENPASTE_TCH2(__CALLSITE_ENABLED_, __LINE__) =                           \
+        TOKENPASTE_TCH2(__CALLSITE_, __LINE__).is_enabled();                   \
   }
-
 #endif
+
+#ifndef tch_event
+#define tch_event(level, name)                                                 \
+  __tch_callsite(level, name);                                                 \
+  if (TOKENPASTE_TCH2(__CALLSITE_ENABLED_, __LINE__)) {                        \
+    /* push fields */                                                          \
+    ::cloudchamber::dispatch_tracing_event(                                    \
+        TOKENPASTE_TCH2(__CALLSITE_, __LINE__).get_meta());                    \
+  }
+#endif
+
+#ifndef tch_event_msg
+#define tch_event_msg(level, name, msg)                                        \
+  __tch_callsite(level, name, "message");                                      \
+  if (TOKENPASTE_TCH2(__CALLSITE_ENABLED_, __LINE__)) {                        \
+    /* push fields */                                                          \
+    ::cloudchamber::dispatch_tracing_event1(                                   \
+        TOKENPASTE_TCH2(__CALLSITE_, __LINE__).get_meta(),                     \
+        ::cloudchamber::FieldValue(msg));                                      \
+  }
+#endif
+
+void print_type() {
+  tch_event(::cloudchamber::level::INFO, "print_type.event");
+  tch_event_msg(::cloudchamber::level::INFO, "print_type.event2",
+                "message form event");
+}

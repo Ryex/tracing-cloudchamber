@@ -1,5 +1,6 @@
 #[cxx::bridge(namespace = "cloudchamber")]
 pub mod ffi {
+
     pub struct Metadata<'a> {
         name: &'static str,
         target: &'a str,
@@ -7,10 +8,11 @@ pub mod ffi {
         file: &'static str,
         line: u32,
         fields: &'static [&'static str],
-        callsite: *const Callsite,
+        callsite: &'static Callsite,
         kind: Kind,
     }
 
+    #[namespace = "cloudchamber::detail"]
     pub enum LevelValue {
         ERROR,
         WARN,
@@ -23,6 +25,7 @@ pub mod ffi {
         value: LevelValue,
     }
 
+    #[namespace = "cloudchamber::detail"]
     pub enum KindValue {
         EVENT,
         SPAN,
@@ -33,6 +36,7 @@ pub mod ffi {
         value: KindValue,
     }
 
+    #[namespace = "cloudchamber::detail"]
     pub enum InterestKind {
         NEVER,
         SOMERTIMES,
@@ -41,6 +45,24 @@ pub mod ffi {
 
     pub struct Interest {
         value: InterestKind,
+    }
+
+    #[namespace = "cloudchamber::detail"]
+    pub enum FieldValueKind {
+        U8,
+        U16,
+        U32,
+        U64,
+        I8,
+        I16,
+        I32,
+        I64,
+        F32,
+        F64,
+        STRING,
+        STR,
+        BOOL,
+        DEBUG,
     }
 
     unsafe extern "C++" {
@@ -52,6 +74,37 @@ pub mod ffi {
         pub fn register_site(self: &Callsite) -> Interest;
         pub fn store_interest(self: &Callsite, value: &Interest);
         pub fn get_meta<'a>(self: &Callsite) -> &Box<RustMetadata<'a>>;
+
+    }
+
+    extern "C++" {
+        include!("tracing-cloudchamber/src/lib.h");
+
+        #[namespace = "cloudchamber::detail"]
+        type FieldValueKind;
+    }
+
+    unsafe extern "C++" {
+        include!("tracing-cloudchamber/src/lib.h");
+
+        type FieldValue;
+
+        fn get_u8(&self) -> &u8;
+        fn get_u16(&self) -> &u16;
+        fn get_u32(&self) -> &u32;
+        fn get_u64(&self) -> &u64;
+        fn get_i8(&self) -> &i8;
+        fn get_i16(&self) -> &i16;
+        fn get_i32(&self) -> &i32;
+        fn get_i64(&self) -> &i64;
+        fn get_f32(&self) -> &f32;
+        fn get_f64(&self) -> &f64;
+        fn get_bool(&self) -> &bool;
+        fn get_string(&self) -> &String;
+        fn get_str(&self) -> &String;
+        fn get_debug(&self) -> Result<&String>;
+
+        fn get_type(&self) -> FieldValueKind;
     }
 
     extern "Rust" {
@@ -64,6 +117,25 @@ pub mod ffi {
 
         fn default_enabled_for_meta(interest: &Interest, meta: &Box<RustMetadata>) -> bool;
         fn dispatch_tracing_event(meta: &'static Box<RustMetadata>);
+        fn dispatch_tracing_event1(meta: &'static Box<RustMetadata>, f1: &FieldValue);
+        fn dispatch_tracing_event2(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+        );
+        fn dispatch_tracing_event3(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+        );
+        fn dispatch_tracing_event4(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+        );
     }
 }
 
@@ -189,7 +261,6 @@ impl From<&tracing_core::Interest> for ffi::Interest {
 
 impl<'a> From<&ffi::Metadata<'a>> for tracing::Metadata<'a> {
     fn from(value: &ffi::Metadata<'a>) -> Self {
-        let callsite_ref = unsafe { &*value.callsite };
         tracing::Metadata::new(
             value.name,
             value.target,
@@ -199,7 +270,7 @@ impl<'a> From<&ffi::Metadata<'a>> for tracing::Metadata<'a> {
             None,
             tracing::field::FieldSet::new(
                 value.fields,
-                tracing::callsite::Identifier(callsite_ref),
+                tracing::callsite::Identifier(value.callsite),
             ),
             (&value.kind).into(),
         )
@@ -266,9 +337,121 @@ fn default_enabled_for_meta(interest: &ffi::Interest, meta: &Box<RustMetadata>) 
 
 #[allow(clippy::borrowed_box)]
 fn dispatch_tracing_event(meta: &'static Box<RustMetadata>) {
-    let meta = &meta.0;
-    let val_set = meta.fields().value_set(&[]);
-    tracing::Event::dispatch(meta, &val_set);
+    tracing::Event::dispatch(&meta.0, &meta.0.fields().value_set(&[]));
+}
+
+#[allow(clippy::borrowed_box)]
+fn dispatch_tracing_event1(meta: &'static Box<RustMetadata>, f1: &ffi::FieldValue) {
+    let mut iter = meta.0.fields().iter();
+    let pairs = [(
+        &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+        f1.as_value(),
+    )];
+    let val_set = meta.0.fields().value_set(&pairs);
+    tracing::Event::dispatch(&meta.0, &val_set);
+}
+
+#[allow(clippy::borrowed_box)]
+fn dispatch_tracing_event2(
+    meta: &'static Box<RustMetadata>,
+    f1: &ffi::FieldValue,
+    f2: &ffi::FieldValue,
+) {
+    let mut iter = meta.0.fields().iter();
+    let pairs = [
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f1.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f2.as_value(),
+        ),
+    ];
+    let val_set = meta.0.fields().value_set(&pairs);
+    tracing::Event::dispatch(&meta.0, &val_set);
+}
+
+#[allow(clippy::borrowed_box)]
+fn dispatch_tracing_event3(
+    meta: &'static Box<RustMetadata>,
+    f1: &ffi::FieldValue,
+    f2: &ffi::FieldValue,
+    f3: &ffi::FieldValue,
+) {
+    let mut iter = meta.0.fields().iter();
+    let pairs = [
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f1.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f2.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f3.as_value(),
+        ),
+    ];
+    let val_set = meta.0.fields().value_set(&pairs);
+    tracing::Event::dispatch(&meta.0, &val_set);
+}
+
+#[allow(clippy::borrowed_box)]
+fn dispatch_tracing_event4(
+    meta: &'static Box<RustMetadata>,
+    f1: &ffi::FieldValue,
+    f2: &ffi::FieldValue,
+    f3: &ffi::FieldValue,
+    f4: &ffi::FieldValue,
+) {
+    let mut iter = meta.0.fields().iter();
+    let pairs = [
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f1.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f2.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f3.as_value(),
+        ),
+        (
+            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+            f4.as_value(),
+        ),
+    ];
+    let val_set = meta.0.fields().value_set(&pairs);
+    tracing::Event::dispatch(&meta.0, &val_set);
+}
+
+impl ffi::FieldValue {
+    fn as_value(&self) -> Option<&dyn tracing::field::Value> {
+        match self.get_type() {
+            ffi::FieldValueKind::U8 => Some(self.get_u8() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::U16 => Some(self.get_u16() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::U32 => Some(self.get_u32() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::U64 => Some(self.get_u64() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::I8 => Some(self.get_i8() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::I16 => Some(self.get_i16() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::I32 => Some(self.get_i32() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::I64 => Some(self.get_i64() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::F32 => Some(self.get_f32() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::F64 => Some(self.get_f64() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::STRING => Some(self.get_string() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::STR => Some(self.get_str() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::BOOL => Some(self.get_bool() as &dyn tracing::field::Value),
+            ffi::FieldValueKind::DEBUG => match self.get_debug() {
+                Ok(s) => Some(s as &dyn tracing::field::Value),
+                Err(_) => None,
+            },
+            _ => None,
+        }
+    }
 }
 
 #[cfg(debug_assertions)]
@@ -277,7 +460,8 @@ fn dispatch_tracing_event(meta: &'static Box<RustMetadata>) {
 pub mod test_ffi {
     unsafe extern "C++" {
         include!("cloudchamber/tests/tests.h");
-        fn emit_spaned_event();
+        fn emit_event();
+        fn emit_event_with_msg();
     }
 }
 mod unused {
@@ -289,18 +473,34 @@ mod unused {
 #[cfg(test)]
 mod tests {
     use super::test_ffi;
-    use tracing::subscriber::with_default;
+    use tracing::{Value, subscriber::with_default};
     use tracing_mock::{expect, subscriber};
 
     #[test]
-    fn emit_spaned_event() {
+    fn emit_event() {
         let (subscriber, handle) = subscriber::mock()
-            .event(expect::event().named("tests.emit_spaned_event"))
+            .event(expect::event().named("tests.emit_event"))
             .only()
             .run_with_handle();
 
         with_default(subscriber, || {
-            test_ffi::emit_spaned_event();
+            test_ffi::emit_event();
+        });
+        handle.assert_finished();
+    }
+    #[test]
+    fn emit_event_with_msg() {
+        let (subscriber, handle) = subscriber::mock()
+            .event(
+                expect::event()
+                    .named("tests.emit_event_message")
+                    .with_fields(expect::field("message").with_value(&"message from event")),
+            )
+            .only()
+            .run_with_handle();
+
+        with_default(subscriber, || {
+            test_ffi::emit_event_with_msg();
         });
         handle.assert_finished();
     }
