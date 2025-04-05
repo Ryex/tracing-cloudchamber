@@ -1,6 +1,6 @@
 #pragma once
 
-namespace tests {
+namespace tch_tests {
 void emit_event();
 void emit_event_with_msg();
-} // namespace tests
+} // namespace tch_tests

@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef TRACING_CLOUDCHAMBER_H
+#define TRACING_CLOUDCHAMBER_H
+
 #include <functional>
 #include <iostream>
 #include <memory>
@@ -117,8 +120,4 @@ constexpr std::string_view __QUALIFIED_FUNCTION(T &&name) {
   }
 #endif
 
-void print_type() {
-  tch_event(::cloudchamber::level::INFO, "print_type.event");
-  tch_event_msg(::cloudchamber::level::INFO, "print_type.event2",
-                "message form event");
-}
+#endif

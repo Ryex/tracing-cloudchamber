@@ -16,6 +16,7 @@ fn main() {
     fs::copy("include/tracing.h", cloudchanber.join("tracing.h")).unwrap();
 
     println!("cargo:rerun-if-changed=include/tracing.h");
+
     #[cfg(debug_assertions)]
     {
         let tests = cloudchanber.join("tests");
@@ -24,29 +25,26 @@ fn main() {
         println!("cargo:rerun-if-changed=tests/tests.h");
     }
 
-    let mut sources = vec!["src/lib.rs"];
-
-    // #[cfg(debug_assertions)]
-    // sources.push("tests/test.rs");
+    let sources = vec!["src/lib.rs"];
 
     let mut cpp_sources = vec!["src/lib.cc"];
 
     #[cfg(debug_assertions)]
     cpp_sources.push("tests/tests.cc");
 
-    let mut builder = cxx_build::bridges(&sources);
-    builder
-        .cpp(true)
+    let mut cxx = cxx_build::bridges(&sources);
+    cxx.cpp(true)
         .std("c++17")
-        .flag_if_supported("/Zc:__cplusplus");
+        .flag_if_supported("/Zc:__cplusplus")
+        .flag_if_supported("-U_FORTIFY_SOURCE");
 
     for file in sources {
         println!("cargo:rerun-if-changed={file}");
     }
     for file in cpp_sources {
-        builder.file(file);
+        cxx.file(file);
         println!("cargo:rerun-if-changed={file}");
     }
 
-    builder.compile("tracing-cloudchamber");
+    cxx.compile("tracingcc");
 }

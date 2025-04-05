@@ -327,11 +327,6 @@ impl tracing::Callsite for ffi::Callsite {
 fn default_enabled_for_meta(interest: &ffi::Interest, meta: &Box<RustMetadata>) -> bool {
     let interest: tracing_core::Interest = interest.into();
     let meta = &meta.as_ref().0;
-    let enabled_for_meta = tracing::dispatcher::get_default(|default| default.enabled(meta));
-    let interest_is_always = interest.is_always();
-    println!(
-        "enabled_for: interest_is_always = {interest_is_always}, enabled_for_meta = {enabled_for_meta}"
-    );
     interest.is_always() || tracing::dispatcher::get_default(|default| default.enabled(meta))
 }
 
@@ -455,7 +450,7 @@ impl ffi::FieldValue {
 }
 
 #[cfg(debug_assertions)]
-#[cxx::bridge(namespace = "tests")]
+#[cxx::bridge(namespace = "tch_tests")]
 /// Tests FFI
 pub mod test_ffi {
     unsafe extern "C++" {
@@ -464,7 +459,10 @@ pub mod test_ffi {
         fn emit_event_with_msg();
     }
 }
+
 mod unused {
+    #[allow(dead_code)]
+    /// for cargo expand inspection only
     fn test_tracing_event() {
         tracing::event!(tracing::Level::INFO, test = 5, "messge in event");
     }
@@ -473,7 +471,7 @@ mod unused {
 #[cfg(test)]
 mod tests {
     use super::test_ffi;
-    use tracing::{Value, subscriber::with_default};
+    use tracing::subscriber::with_default;
     use tracing_mock::{expect, subscriber};
 
     #[test]
