@@ -204,7 +204,7 @@ auto new_span0(Args &&...args)
 
 #define _tcc_event_name() "event " _TCC_STR(__FILE__) ":" _TCC_STR(__LINE__)
 
-#define _tcc_callsite(callsite, level, name)                                   \
+#define _tcc_callsite(callsite, level, name, kind)                             \
   static const ::cloudchamber::Callsite _TCC_TOKENPASTE(callsite,              \
                                                         __LINE__) = {};        \
   static const ::cloudchamber::Metadata _TCC_TOKENPASTE(                       \
@@ -219,7 +219,7 @@ auto new_span0(Args &&...args)
       ::rust::Slice<const ::rust::Str>(                                        \
           _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _FIELDS), __LINE__)),      \
       _TCC_TOKENPASTE(callsite, __LINE__),                                     \
-      ::cloudchamber::Kind{::cloudchamber::detail::KindValue::EVENT}};         \
+      ::cloudchamber::Kind{::cloudchamber::detail::KindValue::kind}};          \
   _TCC_TOKENPASTE(callsite, __LINE__)                                          \
       .set_metadata_ptr(                                                       \
           &_TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _META), __LINE__));       \
@@ -230,26 +230,26 @@ auto new_span0(Args &&...args)
         _TCC_TOKENPASTE(callsite, __LINE__).is_enabled();                      \
   }
 
-#define tcc_callsite_f(callsite, level, name, ...)                             \
+#define tcc_callsite_f(callsite, level, name, kind, ...)                       \
   static const std::array<::rust::Str, _TCC_COUNT_VARARGS(__VA_ARGS__)>        \
       _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _FIELDS),                      \
                       __LINE__) = {_TCC_LIST_WRAP(_TCC_STR, __VA_ARGS__)};     \
-  _tcc_callsite(callsite, level, name)
+  _tcc_callsite(callsite, level, name, kind)
 
-#define tcc_callsite(callsite, level, name)                                    \
+#define tcc_callsite(callsite, level, name, kind)                              \
   static const std::array<::rust::Str, 0> _TCC_TOKENPASTE(                     \
       _TCC_TOKENPASTE(callsite, _FIELDS), __LINE__) = {};                      \
-  _tcc_callsite(callsite, level, name)
+  _tcc_callsite(callsite, level, name, kind)
 
 #define tcc_named_event(level, name)                                           \
-  tcc_callsite(__CALLSITE, level, name);                                       \
+  tcc_callsite(__CALLSITE, level, name, EVENT);                                \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     ::cloudchamber::dispatch_tracing_event(                                    \
         _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());                     \
   }
 
 #define tcc_named_event_f(level, name, ...)                                    \
-  tcc_callsite_f(__CALLSITE, level, name, __VA_ARGS__);                        \
+  tcc_callsite_f(__CALLSITE, level, name, EVENT, __VA_ARGS__);                 \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
                     _TCC_COUNT_VARARGS(__VA_ARGS__))(                          \
@@ -258,7 +258,8 @@ auto new_span0(Args &&...args)
   }
 
 #define tcc_named_event_p(level, name, ...)                                    \
-  tcc_callsite_f(__CALLSITE, level, name, _TCC_GET_PAIRS_FIRST(__VA_ARGS__));  \
+  tcc_callsite_f(__CALLSITE, level, name, EVENT,                               \
+                 _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
                     _TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__))(                    \
@@ -268,7 +269,7 @@ auto new_span0(Args &&...args)
   }
 
 #define tcc_named_event_msg(level, name, msg)                                  \
-  tcc_callsite_f(__CALLSITE, level, name, message);                            \
+  tcc_callsite_f(__CALLSITE, level, name, EVENT, message);                     \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     ::cloudchamber::dispatch_tracing_event1(                                   \
         _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
@@ -276,7 +277,7 @@ auto new_span0(Args &&...args)
   }
 
 #define tcc_named_event_msg_f(level, name, msg, ...)                           \
-  tcc_callsite_f(__CALLSITE, level, name, message, __VA_ARGS__);               \
+  tcc_callsite_f(__CALLSITE, level, name, EVENT, message, __VA_ARGS__);        \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
                     _TCC_COUNT_VARARGS(msg, __VA_ARGS__))(                     \
@@ -286,7 +287,7 @@ auto new_span0(Args &&...args)
   }
 
 #define tcc_named_event_msg_p(level, name, msg, ...)                           \
-  tcc_callsite_f(__CALLSITE, level, name, message,                             \
+  tcc_callsite_f(__CALLSITE, level, name, EVENT, message,                      \
                  _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
   if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
     _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
@@ -391,7 +392,7 @@ auto new_span0(Args &&...args)
                         __VA_ARGS__)
 
 #define tcc_span(ident, level, name)                                           \
-  tcc_callsite(__CALLSITE, level, name);                                       \
+  tcc_callsite(__CALLSITE, level, name, SPAN);                                 \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
       _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
           ? ::cloudchamber::new_span(                                          \
@@ -400,7 +401,7 @@ auto new_span0(Args &&...args)
                 _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
 
 #define tcc_span_f(ident, level, name, ...)                                    \
-  tcc_callsite_f(__CALLSITE, level, name, __VA_ARGS__);                        \
+  tcc_callsite_f(__CALLSITE, level, name, SPAN, __VA_ARGS__);                  \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
       _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
           ? _TCC_TOKENPASTE(::cloudchamber::new_span,                          \
@@ -411,7 +412,8 @@ auto new_span0(Args &&...args)
                 _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
 
 #define tcc_span_p(ident, level, name, ...)                                    \
-  tcc_callsite_f(__CALLSITE, level, name, _TCC_GET_PAIRS_FIRST(__VA_ARGS__));  \
+  tcc_callsite_f(__CALLSITE, level, name, SPAN,                                \
+                 _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
       _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
           ? ident = _TCC_TOKENPASTE(::cloudchamber::new_span,                  \
@@ -421,5 +423,40 @@ auto new_span0(Args &&...args)
                                _TCC_GET_PAIRS_SECOND(__VA_ARGS__)))            \
           : ::cloudchamber::new_disabled_span(                                 \
                 _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
+
+#define tcc_error_span(ident, name)                                            \
+  tcc_span(ident, ::cloudchamber::level::ERROR, name)
+#define tcc_error_span_f(ident, name, ...)                                     \
+  tcc_span_f(ident, ::cloudchamber::level::ERROR, name, __VA_ARGS__)
+#define tcc_error_span_p(ident, name, ...)                                     \
+  tcc_span_p(ident, ::cloudchamber::level::ERROR, name, __VA_ARGS__)
+
+#define tcc_warn_span(ident, name)                                             \
+  tcc_span(ident, ::cloudchamber::level::WARN, name)
+#define tcc_warn_span_f(ident, name, ...)                                      \
+  tcc_span_f(ident, ::cloudchamber::level::WARN, name, __VA_ARGS__)
+#define tcc_warn_span_p(ident, name, ...)                                      \
+  tcc_span_p(ident, ::cloudchamber::level::WARN, name, __VA_ARGS__)
+
+#define tcc_info_span(ident, name)                                             \
+  tcc_span(ident, ::cloudchamber::level::INFO, name)
+#define tcc_info_span_f(ident, name, ...)                                      \
+  tcc_span_f(ident, ::cloudchamber::level::INFO, name, __VA_ARGS__)
+#define tcc_info_span_p(ident, name, ...)                                      \
+  tcc_span_p(ident, ::cloudchamber::level::INFO, name, __VA_ARGS__)
+
+#define tcc_debug_span(ident, name)                                            \
+  tcc_span(ident, ::cloudchamber::level::DEBUG, name)
+#define tcc_debug_span_f(ident, name, ...)                                     \
+  tcc_span_f(ident, ::cloudchamber::level::DEBUG, name, __VA_ARGS__)
+#define tcc_debug_span_p(ident, name, ...)                                     \
+  tcc_span_p(ident, ::cloudchamber::level::DEBUG, name, __VA_ARGS__)
+
+#define tcc_trace_span(ident, name)                                            \
+  tcc_span(ident, ::cloudchamber::level::TRACE, name)
+#define tcc_trace_span_f(ident, name, ...)                                     \
+  tcc_span_f(ident, ::cloudchamber::level::TRACE, name, __VA_ARGS__)
+#define tcc_trace_span_p(ident, name, ...)                                     \
+  tcc_span_p(ident, ::cloudchamber::level::TRACE, name, __VA_ARGS__)
 
 #endif

@@ -223,7 +223,7 @@ pub mod ffi {
         type Entered<'a>;
 
         /// genter a span and return a guard that will exit the span when droped
-        pub fn enter(self: &Span) -> Box<Entered>;
+        unsafe fn enter<'a>(self: &'a Span) -> Box<Entered<'a>>;
         /// Returns `true` if this `Span` has a field for the given field name
         ///
         /// * `field`: field name
@@ -672,7 +672,7 @@ impl Span {
     }
 
     fn in_scope(&self, f: &ffi::ScopeLambda) {
-        let _ = self.0.enter();
+        let _guard = self.0.enter();
         f.call();
     }
 }

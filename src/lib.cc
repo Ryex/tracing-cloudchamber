@@ -120,8 +120,8 @@ const rust::Box<DisplayValue> &FieldValue::get_debug() const {
     throw std::runtime_error("No debug formatter stored for this type.");
   }
 }
-template <typename T, typename... Args>
-ScopeLambda::ScopeLambda(std::function<T(Args...)> f) : f(f) {}
+
+ScopeLambda::ScopeLambda(std::function<void()> f) : f(f) {}
 
 void ScopeLambda::call() const { f(); }
 

@@ -252,8 +252,7 @@ private:
  *
  */
 struct ScopeLambda {
-  template <typename T, typename... Args>
-  ScopeLambda(std::function<T(Args...)> f);
+  ScopeLambda(std::function<void()> f);
   void call() const;
 
 private:

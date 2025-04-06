@@ -1,0 +1,21 @@
+[package]
+name = "tracing-cloudchamber-tests"
+version = "0.1.0"
+edition = "2021"
+links = "tracingcctests"
+publish = false
+
+[dependencies]
+cxx = { version = "1.0", features = [ "c++17"] }
+tracing = "0.1"
+tracing-subscriber = "0.3"
+tracing-cloudchamber = {path = "../.."}
+
+[build-dependencies]
+cxx-build = { version = "1.0", features = ["parallel"] }
+
+[dev-dependencies]
+tracing-mock = "0.1.0-beta.1"
+
+[profile.dev]
+opt-level = 1             
