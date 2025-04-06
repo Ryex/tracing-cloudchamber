@@ -1,7 +1,21 @@
 [package]
 name = "tracing-cloudchamber"
 version = "0.1.0"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/Ryex/tracing-cloudchamber"
+description = """
+Extend tracing with an ffi via cxx to emit events and create spans in C++
+"""
+categories = [
+    "development-tools::debugging",
+    "development-tools::profiling",
+    "asynchronous",
+    "no-std",
+]
+keywords = ["logging", "tracing", "metrics", "async"]
 edition = "2021"
+rust-version = "1.63.0"
 links = "tracingcc"
 
 [lib]

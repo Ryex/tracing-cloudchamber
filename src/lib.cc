@@ -4,6 +4,7 @@
 #include "tracing-cloudchamber/src/lib.rs.h"
 #include <atomic>
 #include <cassert>
+#include <iomanip>
 #include <iostream>
 
 namespace cloudchamber {
@@ -111,10 +112,7 @@ const rust::String &FieldValue::get_str() const noexcept {
 
 const rust::Box<DisplayValue> &FieldValue::get_debug() const {
   if (debug_formater != nullptr) {
-    if (!_display.has_value()) {
-      _display.emplace(
-          ::cloudchamber::string_to_display_value(debug_formater()));
-    }
+    _display.emplace(::cloudchamber::string_to_display_value(debug_formater()));
     return _display.value();
   } else {
     throw std::runtime_error("No debug formatter stored for this type.");
@@ -124,5 +122,27 @@ const rust::Box<DisplayValue> &FieldValue::get_debug() const {
 ScopeLambda::ScopeLambda(std::function<void()> f) : f(f) {}
 
 void ScopeLambda::call() const { f(); }
+
+namespace util {
+
+template <> std::string toString(std::string const &s) {
+  std::ostringstream out;
+  out << std::quoted(s);
+  return out.str();
+}
+
+template <> std::string toString(std::string_view const &s) {
+  std::ostringstream out;
+  out << std::quoted(s);
+  return out.str();
+}
+
+std::string toString(const char *s) {
+  std::ostringstream out;
+  out << std::quoted(s);
+  return out.str();
+}
+
+} // namespace util
 
 } // namespace cloudchamber

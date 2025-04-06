@@ -2,10 +2,14 @@
 
 #include <atomic>
 #include <functional>
+#include <iomanip>
+#include <map>
 #include <memory>
 #include <optional>
+#include <sstream>
+#include <string>
 #include <string_view>
-#include <sys/types.h>
+#include <type_traits>
 
 #include "rust/cxx.h"
 
@@ -28,24 +32,6 @@ inline std::string string_format(const std::string &format, Args... args) {
 
 } // namespace detail
 } // namespace cloudchamber
-
-template <typename T, std::enable_if_t<std::is_signed<T>::value &&
-                                           !std::is_floating_point<T>::value,
-                                       bool> = true>
-std::string tcc_field_format(T value) {
-  return ::cloudchamber::detail::string_format("%i", value);
-}
-
-template <typename T, std::enable_if_t<std::is_unsigned<T>::value, bool> = true>
-std::string tcc_field_format(T value) {
-  return ::cloudchamber::detail::string_format("%u", value);
-}
-
-template <typename T,
-          std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-std::string tcc_field_format(T value) {
-  return ::cloudchamber::detail::string_format("%f", value);
-}
 
 namespace cloudchamber {
 
@@ -164,6 +150,119 @@ enum class FieldValueKind : std::uint8_t {
  */
 struct FieldEmpty {};
 
+namespace util {
+template <typename...> using try_to_instantiate = void;
+
+using disregard_this = void;
+
+template <template <typename...> class Expression, typename Attempt,
+          typename... Ts>
+struct is_detected_impl : std::false_type {};
+
+template <template <typename...> class Expression, typename... Ts>
+struct is_detected_impl<Expression, try_to_instantiate<Expression<Ts...>>,
+                        Ts...> : std::true_type {};
+
+template <template <typename...> class Expression, typename... Ts>
+constexpr bool is_detected =
+    is_detected_impl<Expression, disregard_this, Ts...>::value;
+
+template <typename T>
+using std_to_string_expression = decltype(std::to_string(std::declval<T>()));
+
+template <typename T>
+constexpr bool has_std_to_string = is_detected<std_to_string_expression, T>;
+
+template <typename T>
+using to_string_expression = decltype(to_string(std::declval<T>()));
+
+template <typename T>
+constexpr bool has_to_string = is_detected<to_string_expression, T>;
+
+template <typename T>
+using ostringstream_expression =
+    decltype(std::declval<std::ostringstream &>() << std::declval<T>());
+
+template <typename T>
+constexpr bool has_ostringstream = is_detected<ostringstream_expression, T>;
+
+template <typename T,
+          typename std::enable_if<has_std_to_string<T>, int>::type = 0>
+std::string toString(T const &t) {
+  return std::to_string(t);
+}
+
+template <typename T,
+          typename std::enable_if<!has_std_to_string<T> && has_to_string<T>,
+                                  int>::type = 0>
+std::string toString(T const &t) {
+  return to_string(t);
+}
+
+template <typename T,
+          typename std::enable_if<!has_std_to_string<T> && !has_to_string<T> &&
+                                      has_ostringstream<T>,
+                                  int>::type = 0>
+std::string toString(T const &t) {
+  std::ostringstream out;
+  out << t;
+  return out.str();
+}
+
+template <> std::string toString(std::string const &s);
+template <> std::string toString(std::string_view const &s);
+std::string toString(const char *s);
+} // namespace util
+
+template <typename T> std::string field_format(const T &value) {
+  return ::cloudchamber::util::toString(value);
+}
+
+template <typename T> std::string field_format(const std::vector<T> &value) {
+  std::ostringstream out;
+  out << "std::vector[";
+  const std::size_t size = value.size();
+  for (std::size_t i = 0; i < size; ++i) {
+    if (i > 0) {
+      out << ", ";
+    }
+    out << ::cloudchamber::util::toString(value[i]);
+  }
+  out << "]";
+  return out.str();
+}
+
+template <std::size_t N, typename T>
+std::string field_format(const std::array<T, N> &value) {
+  std::ostringstream out;
+  out << "std::array<" << N << ">[";
+  for (std::size_t i = 0; i < N; ++i) {
+    if (i > 0) {
+      out << ", ";
+    }
+    out << ::cloudchamber::util::toString(value[i]);
+  }
+  out << "]";
+  return out.str();
+}
+
+template <typename K, typename V>
+std::string field_format(const std::map<K, V> &value) {
+  std::ostringstream out;
+  out << "std::map{";
+  std::size_t index = 0;
+  for (const auto &n : value) {
+    if (index > 0) {
+      out << ", ";
+    }
+    out << ::cloudchamber::util::toString(n.first) << ": "
+        << ::cloudchamber::util::toString(n.second);
+    ++index;
+  }
+  out << "}";
+  return out.str();
+}
+
 /**
  * @class FieldValue
  * @brief a rust like "trait" for values that can be attached to fields, records
@@ -175,7 +274,8 @@ struct FieldValue : public ::cloudchamber::detail::FieldTrait {
   FieldValue(T &t)
       : FieldTrait(std::move(t)),
         _tag(::cloudchamber::detail::FieldValueKind::DEBUG),
-        debug_formater([this]() { return ::tcc_field_format(rcast<T>()); }) {}
+        debug_formater(
+            [this]() { return ::cloudchamber::field_format(rcast<T>()); }) {}
   FieldValue(FieldEmpty &t)
       : FieldTrait(std::move(t)),
         _tag(::cloudchamber::detail::FieldValueKind::EMPTY) {}

@@ -14,7 +14,6 @@ pub mod test_ffi {
 }
 
 mod _using {
-
     /// prevent symbol elision
     #[allow(unused_imports)]
     pub use tracing_cloudchamber::*;
@@ -102,59 +101,75 @@ mod tests {
             .named("a_trace_span")
             .at_level(tracing::Level::TRACE);
 
-        let (subscriber, handle) = subscriber::mock()
-            .new_span(
-                span1.clone().with_fields(
-                    expect::field("span_struct")
-                        .with_value(&tracing::field::display(
-                            "MyTestStruct { val: 999, str: \"a\" }",
-                        ))
-                        .only(),
-                ),
-            )
-            .event(
-                expect::event().with_fields(
-                    expect::field("message")
-                        .with_value(&"a trace message after span construction but before enter")
-                        .only(),
-                ),
-            )
-            .enter(span1.clone())
-            .event(expect::event().named("tests.emit_event"))
-            .exit(span1.clone())
-            .event(
-                expect::event().at_level(tracing::Level::ERROR).with_fields(
-                    expect::field("message")
-                        .with_value(&"a fake error msg")
-                        .only(),
-                ),
-            )
-            .new_span(span2.clone())
-            .enter(span2.clone())
-            .event(
-                expect::event().at_level(tracing::Level::INFO).with_fields(
-                    expect::field("message")
-                        .with_value(&"in_scope info msg")
-                        .only(),
-                ),
-            )
-            .event(
-                expect::event()
-                    .named("tests.emit_event_message")
-                    .with_fields(
-                        expect::field("message")
-                            .with_value(&"message from event")
-                            .and(
-                                expect::field("my_test").with_value(&tracing::field::display(
-                                    "MyTestStruct { val: 105, str: \"str in struct\" }",
-                                )),
-                            )
+        let (subscriber, handle) =
+            subscriber::mock()
+                .new_span(
+                    span1.clone().with_fields(
+                        expect::field("span_struct")
+                            .with_value(&tracing::field::display(
+                                "MyTestStruct { val: 999, str: \"a\" }",
+                            ))
                             .only(),
                     ),
-            )
-            .exit(span2.clone())
-            .only()
-            .run_with_handle();
+                )
+                .event(
+                    expect::event().with_fields(
+                        expect::field("message")
+                            .with_value(&"a trace message after span construction but before enter")
+                            .only(),
+                    ),
+                )
+                .enter(span1.clone())
+                .event(expect::event().named("tests.emit_event"))
+                .exit(span1.clone())
+                .event(
+                    expect::event().at_level(tracing::Level::ERROR).with_fields(
+                        expect::field("message")
+                            .with_value(&"a fake error msg")
+                            .and(expect::field("vector").with_value(&tracing::field::display(
+                                "std::vector[10, 9, 43, 1000]",
+                            )))
+                            .only(),
+                    ),
+                )
+                .new_span(
+                    span2.clone().at_level(tracing::Level::TRACE).with_fields(
+                        expect::field("an_array")
+                            .with_value(&tracing::field::display(
+                                "std::array<4>[\"an\", \"array\", \"of\", \"strings\"]",
+                            ))
+                            .and(
+                                expect::field("answers").with_value(&tracing::field::display(
+                                    "std::map{\"everything\": 42, \"life\": 42, \"universe\": 42}",
+                                )),
+                            ),
+                    ),
+                )
+                .enter(span2.clone())
+                .event(
+                    expect::event().at_level(tracing::Level::INFO).with_fields(
+                        expect::field("message")
+                            .with_value(&"in_scope info msg")
+                            .only(),
+                    ),
+                )
+                .event(
+                    expect::event()
+                        .named("tests.emit_event_message")
+                        .with_fields(
+                            expect::field("message")
+                                .with_value(&"message from event")
+                                .and(
+                                    expect::field("my_test").with_value(&tracing::field::display(
+                                        "MyTestStruct { val: 105, str: \"str in struct\" }",
+                                    )),
+                                )
+                                .only(),
+                        ),
+                )
+                .exit(span2.clone())
+                .only()
+                .run_with_handle();
 
         with_default(subscriber, || {
             test_ffi::emit_events_in_span();
