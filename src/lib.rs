@@ -63,6 +63,7 @@ pub mod ffi {
         STR,
         BOOL,
         DEBUG,
+        EMPTY,
     }
 
     unsafe extern "C++" {
@@ -102,9 +103,19 @@ pub mod ffi {
         fn get_bool(&self) -> &bool;
         fn get_string(&self) -> &String;
         fn get_str(&self) -> &String;
-        fn get_debug(&self) -> Result<&String>;
+        fn get_debug(&self) -> Result<&Box<DisplayValue>>;
 
         fn get_type(&self) -> FieldValueKind;
+    }
+
+    unsafe extern "C++" {
+        type ScopeLambda;
+        fn call(&self);
+    }
+
+    extern "Rust" {
+        type DisplayValue;
+        pub fn string_to_display_value(value: String) -> Box<DisplayValue>;
     }
 
     extern "Rust" {
@@ -113,6 +124,7 @@ pub mod ffi {
         type RustMetadata<'a>;
         unsafe fn new_rust_metadata<'a>(meta: &'static Metadata<'a>) -> Box<RustMetadata<'a>>;
 
+        /// Returns `true` if this level is enabled by the current subscriber
         fn is_enabled(self: &Level) -> bool;
 
         fn default_enabled_for_meta(interest: &Interest, meta: &Box<RustMetadata>) -> bool;
@@ -136,6 +148,193 @@ pub mod ffi {
             f3: &FieldValue,
             f4: &FieldValue,
         );
+        fn dispatch_tracing_event5(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+        );
+        fn dispatch_tracing_event6(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+        );
+        #[allow(clippy::too_many_arguments)]
+        fn dispatch_tracing_event7(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+        );
+        #[allow(clippy::too_many_arguments)]
+        fn dispatch_tracing_event8(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+        );
+        #[allow(clippy::too_many_arguments)]
+        fn dispatch_tracing_event9(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+            f9: &FieldValue,
+        );
+        #[allow(clippy::too_many_arguments)]
+        fn dispatch_tracing_event10(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+            f9: &FieldValue,
+            f10: &FieldValue,
+        );
+    }
+
+    extern "Rust" {
+
+        type Span;
+        type Entered<'a>;
+
+        /// genter a span and return a guard that will exit the span when droped
+        pub fn enter(self: &Span) -> Box<Entered>;
+        /// Returns `true` if this `Span` has a field for the given field name
+        ///
+        /// * `field`: field name
+        pub fn has_field(self: &Span, field: &str) -> bool;
+        /// Record that the fied described by `field` has the value `value`
+        ///
+        /// This may be used with `::cloudchamber::FieldEmpty` from the cpp side
+        ///
+        /// * `field`: field name
+        /// * `value`: field value
+        pub unsafe fn record<'a>(self: &'a Span, field: &'a str, value: &'a FieldValue)
+            -> &'a Span;
+        /// Returns `true` if this span was constructed by `Span::none`
+        pub fn is_none(self: &Span) -> bool;
+        /// Returns `true` if this span was disabled by the subscriber and does not exist
+        pub fn is_disabeld(self: &Span) -> bool;
+        /// Execute the given function in the context of this span.
+        ///
+        /// * `f`: function to execute
+        fn in_scope(self: &Span, f: &ScopeLambda);
+
+        fn new_disabled_span(meta: &'static Box<RustMetadata>) -> Box<Span>;
+        fn current_span() -> Box<Span>;
+
+        fn new_span(meta: &'static Box<RustMetadata>) -> Box<Span>;
+        fn new_span1(meta: &'static Box<RustMetadata>, f1: &FieldValue) -> Box<Span>;
+        fn new_span2(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+        ) -> Box<Span>;
+        fn new_span3(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+        ) -> Box<Span>;
+        fn new_span4(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+        ) -> Box<Span>;
+        fn new_span5(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+        ) -> Box<Span>;
+        fn new_span6(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+        ) -> Box<Span>;
+        #[allow(clippy::too_many_arguments)]
+        fn new_span7(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+        ) -> Box<Span>;
+        #[allow(clippy::too_many_arguments)]
+        fn new_span8(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+        ) -> Box<Span>;
+        #[allow(clippy::too_many_arguments)]
+        fn new_span9(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+            f9: &FieldValue,
+        ) -> Box<Span>;
+        #[allow(clippy::too_many_arguments)]
+        fn new_span10(
+            meta: &'static Box<RustMetadata>,
+            f1: &FieldValue,
+            f2: &FieldValue,
+            f3: &FieldValue,
+            f4: &FieldValue,
+            f5: &FieldValue,
+            f6: &FieldValue,
+            f7: &FieldValue,
+            f8: &FieldValue,
+            f9: &FieldValue,
+            f10: &FieldValue,
+        ) -> Box<Span>;
     }
 }
 
@@ -289,12 +488,6 @@ fn new_rust_metadata<'a>(meta: &'static ffi::Metadata<'a>) -> Box<RustMetadata<'
     RustMetadata::new(meta)
 }
 
-pub struct Span(tracing::Span);
-
-impl Span {
-    pub fn enter() {}
-}
-
 impl ffi::Callsite {
     #[allow(dead_code)]
     const UNREGISTERED: u8 = 0;
@@ -335,93 +528,46 @@ fn dispatch_tracing_event(meta: &'static Box<RustMetadata>) {
     tracing::Event::dispatch(&meta.0, &meta.0.fields().value_set(&[]));
 }
 
-#[allow(clippy::borrowed_box)]
-fn dispatch_tracing_event1(meta: &'static Box<RustMetadata>, f1: &ffi::FieldValue) {
-    let mut iter = meta.0.fields().iter();
-    let pairs = [(
-        &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-        f1.as_value(),
-    )];
-    let val_set = meta.0.fields().value_set(&pairs);
-    tracing::Event::dispatch(&meta.0, &val_set);
+macro_rules! dispatch_tracing_eventN {
+    ($name:ident, ($($fN:ident),*)) => {
+        #[allow(clippy::borrowed_box)]
+        #[allow(clippy::too_many_arguments)]
+        fn $name (meta: &'static Box<RustMetadata> $(, $fN : &ffi::FieldValue )*) {
+            let mut iter = meta.0.fields().iter();
+            let pairs = [
+                $(
+                    (
+                        &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+                        $fN.as_value(),
+                    )
+                ),*
+            ];
+            let val_set = meta.0.fields().value_set(&pairs);
+            tracing::Event::dispatch(&meta.0, &val_set);
+        }
+    };
 }
 
-#[allow(clippy::borrowed_box)]
-fn dispatch_tracing_event2(
-    meta: &'static Box<RustMetadata>,
-    f1: &ffi::FieldValue,
-    f2: &ffi::FieldValue,
-) {
-    let mut iter = meta.0.fields().iter();
-    let pairs = [
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f1.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f2.as_value(),
-        ),
-    ];
-    let val_set = meta.0.fields().value_set(&pairs);
-    tracing::Event::dispatch(&meta.0, &val_set);
+dispatch_tracing_eventN! {dispatch_tracing_event1, (f1)}
+dispatch_tracing_eventN! {dispatch_tracing_event2, (f1, f2)}
+dispatch_tracing_eventN! {dispatch_tracing_event3, (f1, f2, f3)}
+dispatch_tracing_eventN! {dispatch_tracing_event4, (f1, f2, f3, f4)}
+dispatch_tracing_eventN! {dispatch_tracing_event5, (f1, f2, f3, f4, f5)}
+dispatch_tracing_eventN! {dispatch_tracing_event6, (f1, f2, f3, f4, f5, f6)}
+dispatch_tracing_eventN! {dispatch_tracing_event7, (f1, f2, f3, f4, f5, f6, f7)}
+dispatch_tracing_eventN! {dispatch_tracing_event8, (f1, f2, f3, f4, f5, f6, f7, f8)}
+dispatch_tracing_eventN! {dispatch_tracing_event9, (f1, f2, f3, f4, f5, f6, f7, f8, f9)}
+dispatch_tracing_eventN! {dispatch_tracing_event10, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)}
+
+pub struct DisplayValue(Box<dyn tracing::Value>);
+pub fn string_to_display_value(value: String) -> Box<DisplayValue> {
+    Box::new(DisplayValue(Box::new(tracing::field::display(value))))
 }
 
-#[allow(clippy::borrowed_box)]
-fn dispatch_tracing_event3(
-    meta: &'static Box<RustMetadata>,
-    f1: &ffi::FieldValue,
-    f2: &ffi::FieldValue,
-    f3: &ffi::FieldValue,
-) {
-    let mut iter = meta.0.fields().iter();
-    let pairs = [
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f1.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f2.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f3.as_value(),
-        ),
-    ];
-    let val_set = meta.0.fields().value_set(&pairs);
-    tracing::Event::dispatch(&meta.0, &val_set);
-}
-
-#[allow(clippy::borrowed_box)]
-fn dispatch_tracing_event4(
-    meta: &'static Box<RustMetadata>,
-    f1: &ffi::FieldValue,
-    f2: &ffi::FieldValue,
-    f3: &ffi::FieldValue,
-    f4: &ffi::FieldValue,
-) {
-    let mut iter = meta.0.fields().iter();
-    let pairs = [
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f1.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f2.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f3.as_value(),
-        ),
-        (
-            &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
-            f4.as_value(),
-        ),
-    ];
-    let val_set = meta.0.fields().value_set(&pairs);
-    tracing::Event::dispatch(&meta.0, &val_set);
+impl DisplayValue {
+    pub fn as_value(&self) -> &dyn tracing::Value {
+        &self.0
+    }
 }
 
 impl ffi::FieldValue {
@@ -441,65 +587,105 @@ impl ffi::FieldValue {
             ffi::FieldValueKind::STR => Some(self.get_str() as &dyn tracing::field::Value),
             ffi::FieldValueKind::BOOL => Some(self.get_bool() as &dyn tracing::field::Value),
             ffi::FieldValueKind::DEBUG => match self.get_debug() {
-                Ok(s) => Some(s as &dyn tracing::field::Value),
+                Ok(s) => Some(s.as_value()),
                 Err(_) => None,
             },
+            ffi::FieldValueKind::EMPTY => None, // no printing emptys
             _ => None,
         }
     }
 }
 
-#[cfg(debug_assertions)]
-#[cxx::bridge(namespace = "tch_tests")]
-/// Tests FFI
-pub mod test_ffi {
-    unsafe extern "C++" {
-        include!("cloudchamber/tests/tests.h");
-        fn emit_event();
-        fn emit_event_with_msg();
+pub struct Span(tracing::Span);
+
+#[allow(clippy::borrowed_box)]
+fn new_span(meta: &'static Box<RustMetadata>) -> Box<Span> {
+    Box::new(Span(tracing::Span::new(
+        &meta.0,
+        &meta.0.fields().value_set(&[]),
+    )))
+}
+#[allow(clippy::borrowed_box)]
+fn new_disabled_span(meta: &'static Box<RustMetadata>) -> Box<Span> {
+    Box::new(Span(tracing::Span::new_disabled(&meta.0)))
+}
+
+fn current_span() -> Box<Span> {
+    Box::new(Span(tracing::Span::current()))
+}
+
+macro_rules! new_spanN {
+    ($name:ident, ($($fN:ident),*)) => {
+        #[allow(clippy::borrowed_box)]
+        #[allow(clippy::too_many_arguments)]
+        fn $name (meta: &'static Box<RustMetadata> $(, $fN : &ffi::FieldValue )*) -> Box<Span> {
+            let mut iter = meta.0.fields().iter();
+            let pairs = [
+                $(
+                    (
+                        &::core::iter::Iterator::next(&mut iter).expect("FieldSet corrupted (this is a bug)"),
+                        $fN.as_value(),
+                    )
+                ),*
+            ];
+            let val_set = meta.0.fields().value_set(&pairs);
+            Box::new(Span(tracing::Span::new(
+                &meta.0,
+                &val_set,
+            )))
+        }
+    };
+}
+
+new_spanN! {new_span1, (f1)}
+new_spanN! {new_span2, (f1, f2)}
+new_spanN! {new_span3, (f1, f2, f3)}
+new_spanN! {new_span4, (f1, f2, f3, f4)}
+new_spanN! {new_span5, (f1, f2, f3, f4, f5)}
+new_spanN! {new_span6, (f1, f2, f3, f4, f5, f6)}
+new_spanN! {new_span7, (f1, f2, f3, f4, f5, f6, f7)}
+new_spanN! {new_span8, (f1, f2, f3, f4, f5, f6, f7, f8)}
+new_spanN! {new_span9, (f1, f2, f3, f4, f5, f6, f7, f8, f9)}
+new_spanN! {new_span10, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10)}
+
+pub struct Entered<'a>(#[allow(dead_code)] tracing::span::Entered<'a>);
+
+impl Span {
+    pub fn enter(&self) -> Box<Entered> {
+        Box::new(Entered(self.0.enter()))
+    }
+
+    pub fn has_field(&self, field: &str) -> bool {
+        self.0.has_field(field)
+    }
+
+    pub fn record(&self, field: &str, value: &ffi::FieldValue) -> &Self {
+        self.0.record(field, value.as_value());
+        self
+    }
+    pub fn is_none(&self) -> bool {
+        self.0.is_none()
+    }
+
+    pub fn is_disabeld(&self) -> bool {
+        self.0.is_disabled()
+    }
+
+    fn in_scope(&self, f: &ffi::ScopeLambda) {
+        let _ = self.0.enter();
+        f.call();
     }
 }
 
+/// for cargo expand inspection only
 mod unused {
     #[allow(dead_code)]
-    /// for cargo expand inspection only
     fn test_tracing_event() {
         tracing::event!(tracing::Level::INFO, test = 5, "messge in event");
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::test_ffi;
-    use tracing::subscriber::with_default;
-    use tracing_mock::{expect, subscriber};
-
-    #[test]
-    fn emit_event() {
-        let (subscriber, handle) = subscriber::mock()
-            .event(expect::event().named("tests.emit_event"))
-            .only()
-            .run_with_handle();
-
-        with_default(subscriber, || {
-            test_ffi::emit_event();
-        });
-        handle.assert_finished();
-    }
-    #[test]
-    fn emit_event_with_msg() {
-        let (subscriber, handle) = subscriber::mock()
-            .event(
-                expect::event()
-                    .named("tests.emit_event_message")
-                    .with_fields(expect::field("message").with_value(&"message from event")),
-            )
-            .only()
-            .run_with_handle();
-
-        with_default(subscriber, || {
-            test_ffi::emit_event_with_msg();
-        });
-        handle.assert_finished();
+    #[allow(dead_code)]
+    fn test_tracing_span() {
+        let v = 5;
+        let _span = tracing::span!(tracing::Level::TRACE, "name of span", v);
     }
 }

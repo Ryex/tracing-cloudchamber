@@ -10,10 +10,49 @@
 #include "rust/cxx.h"
 
 namespace cloudchamber {
+namespace detail {
+
+template <typename... Args>
+inline std::string string_format(const std::string &format, Args... args) {
+  int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) +
+               1; // Extra space for '\0'
+  if (size_s <= 0) {
+    throw std::runtime_error("Error during formatting.");
+  }
+  auto size = static_cast<size_t>(size_s);
+  std::unique_ptr<char[]> buf(new char[size]);
+  std::snprintf(buf.get(), size, format.c_str(), args...);
+  return std::string(buf.get(),
+                     buf.get() + size - 1); // We don't want the '\0' inside
+}
+
+} // namespace detail
+} // namespace cloudchamber
+
+template <typename T, std::enable_if_t<std::is_signed<T>::value &&
+                                           !std::is_floating_point<T>::value,
+                                       bool> = true>
+std::string tcc_field_format(T value) {
+  return ::cloudchamber::detail::string_format("%i", value);
+}
+
+template <typename T, std::enable_if_t<std::is_unsigned<T>::value, bool> = true>
+std::string tcc_field_format(T value) {
+  return ::cloudchamber::detail::string_format("%u", value);
+}
+
+template <typename T,
+          std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
+std::string tcc_field_format(T value) {
+  return ::cloudchamber::detail::string_format("%f", value);
+}
+
+namespace cloudchamber {
 
 struct Metadata;
 struct Interest;
 struct RustMetadata;
+struct DisplayValue;
 
 namespace callsite {
 
@@ -28,10 +67,16 @@ const uint8_t INTEREST_EMPTY(0xFF);
 
 } // namespace callsite
 
+/**
+ * @class Callsite
+ * @brief a event call site, holds interst and registation information alonside
+ * the callsite metadata
+ *
+ */
 struct Callsite {
   mutable std::atomic_uint8_t interest;
   mutable std::atomic_uint8_t registration;
-  const ::cloudchamber::Metadata *meta;
+  mutable const ::cloudchamber::Metadata *meta;
   mutable std::optional<rust::Box<RustMetadata>> rust_meta;
 
   Callsite()
@@ -42,8 +87,12 @@ struct Callsite {
   ::cloudchamber::Interest register_site() const;
   void store_interest(const cloudchamber::Interest &intrst) const;
   ::cloudchamber::Interest get_interest() const;
+  /**
+   * @brief Get the metadata used by tracing
+   */
   const rust::Box<RustMetadata> &get_meta() const;
   bool is_enabled() const;
+  void set_metadata_ptr(const ::cloudchamber::Metadata *ptr) const;
 };
 
 namespace detail {
@@ -103,49 +152,33 @@ enum class FieldValueKind : std::uint8_t {
   STR,
   BOOL,
   DEBUG,
+  EMPTY,
 };
-
-template <typename... Args>
-std::string string_format(const std::string &format, Args... args) {
-  int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) +
-               1; // Extra space for '\0'
-  if (size_s <= 0) {
-    throw std::runtime_error("Error during formatting.");
-  }
-  auto size = static_cast<size_t>(size_s);
-  std::unique_ptr<char[]> buf(new char[size]);
-  std::snprintf(buf.get(), size, format.c_str(), args...);
-  return std::string(buf.get(),
-                     buf.get() + size - 1); // We don't want the '\0' inside
-}
 
 } // namespace detail
 
-template <typename T, std::enable_if_t<std::is_signed<T>::value &&
-                                           !std::is_floating_point<T>::value,
-                                       bool> = true>
-std::string field_print(T value) {
-  return ::cloudchamber::detail::string_format("%i", value);
-}
+/**
+ * @class FieldEmpty
+ * @brief placeholder value for a event or span field, will not be printed.
+ *
+ */
+struct FieldEmpty {};
 
-template <typename T, std::enable_if_t<std::is_unsigned<T>::value, bool> = true>
-std::string field_print(T value) {
-  return ::cloudchamber::detail::string_format("%u", value);
-}
-
-template <typename T,
-          std::enable_if_t<std::is_floating_point<T>::value, bool> = true>
-std::string field_print(T value) {
-  return ::cloudchamber::detail::string_format("%f", value);
-}
-
+/**
+ * @class FieldValue
+ * @brief a rust like "trait" for values that can be attached to fields, records
+ * printing information while holding a refrence
+ *
+ */
 struct FieldValue : public ::cloudchamber::detail::FieldTrait {
   template <typename T>
   FieldValue(T &t)
       : FieldTrait(std::move(t)),
         _tag(::cloudchamber::detail::FieldValueKind::DEBUG),
-        debug_formater(
-            [this]() { return ::cloudchamber::field_print(cast<T &>()); }) {}
+        debug_formater([this]() { return ::tcc_field_format(rcast<T>()); }) {}
+  FieldValue(FieldEmpty &t)
+      : FieldTrait(std::move(t)),
+        _tag(::cloudchamber::detail::FieldValueKind::EMPTY) {}
   FieldValue(std::string t)
       : FieldTrait(std::move(t)),
         _tag(::cloudchamber::detail::FieldValueKind::STRING) {}
@@ -191,45 +224,40 @@ struct FieldValue : public ::cloudchamber::detail::FieldTrait {
 
   ::cloudchamber::detail::FieldValueKind get_type() const { return _tag; }
 
-  const std::uint8_t &get_u8() const noexcept { return rcast<std::uint8_t>(); }
-  const std::uint16_t &get_u16() const noexcept {
-    return rcast<std::uint16_t>();
-  }
-  const std::uint32_t &get_u32() const noexcept {
-    return rcast<std::uint32_t>();
-  }
-  const std::uint64_t &get_u64() const noexcept {
-    return rcast<std::uint64_t>();
-  }
-  const std::int8_t &get_i8() const noexcept { return rcast<std::int8_t>(); }
-  const std::int16_t &get_i16() const noexcept { return rcast<std::int16_t>(); }
-  const std::int32_t &get_i32() const noexcept { return rcast<std::int32_t>(); }
-  const std::int64_t &get_i64() const noexcept { return rcast<std::int64_t>(); }
-  const float &get_f32() const noexcept { return rcast<float>(); }
-  const double &get_f64() const noexcept { return rcast<double>(); }
-  const bool &get_bool() const noexcept { return rcast<bool>(); }
-  const rust::String &get_string() const noexcept {
-    _string = ::rust::String::lossy(cast<std::string>());
-    return _string;
-  }
-  const rust::String &get_str() const noexcept {
-    _string = rust::String::lossy(cast<std::string_view>().cbegin());
-    return _string;
-  }
-
-  const rust::String &get_debug() const {
-    if (debug_formater != nullptr) {
-      _string = debug_formater();
-      return _string;
-    } else {
-      throw std::runtime_error("No debug formatter stored for this type.");
-    }
-  }
+  const std::uint8_t &get_u8() const noexcept;
+  const std::uint16_t &get_u16() const noexcept;
+  const std::uint32_t &get_u32() const noexcept;
+  const std::uint64_t &get_u64() const noexcept;
+  const std::int8_t &get_i8() const noexcept;
+  const std::int16_t &get_i16() const noexcept;
+  const std::int32_t &get_i32() const noexcept;
+  const std::int64_t &get_i64() const noexcept;
+  const float &get_f32() const noexcept;
+  const double &get_f64() const noexcept;
+  const bool &get_bool() const noexcept;
+  const rust::String &get_string() const noexcept;
+  const rust::String &get_str() const noexcept;
+  const rust::Box<::cloudchamber::DisplayValue> &get_debug() const;
 
 private:
   ::cloudchamber::detail::FieldValueKind _tag;
   std::function<std::string()> debug_formater;
   mutable rust::String _string;
+  mutable std::optional<rust::Box<::cloudchamber::DisplayValue>> _display;
+};
+
+/**
+ * @class ScopeLambda
+ * @brief Holds a lambda / function to pass to rust. Used by `in_scope`.
+ *
+ */
+struct ScopeLambda {
+  template <typename T, typename... Args>
+  ScopeLambda(std::function<T(Args...)> f);
+  void call() const;
+
+private:
+  std::function<void()> f;
 };
 
 } // namespace cloudchamber

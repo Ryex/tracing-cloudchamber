@@ -300,7 +300,6 @@ dependencies = [
  "cxx-build",
  "tracing",
  "tracing-core",
- "tracing-mock",
 ]
 
 [[package]]
@@ -311,16 +310,6 @@ checksum = "e672c95779cf947c5311f83787af4fa8fffd12fb27e4993211a84bdfd9610f9c"
 dependencies = [
  "once_cell",
  "valuable",
-]
-
-[[package]]
-name = "tracing-mock"
-version = "0.1.0-beta.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3ff59989fc8854bc58d3daeadbccf5d7fb0b722af043cf839c7785f1ff0daf0e"
-dependencies = [
- "tracing",
- "tracing-core",
 ]
 
 [[package]]

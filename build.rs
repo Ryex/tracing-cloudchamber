@@ -4,6 +4,7 @@ use std::{env, fs};
 
 fn main() {
     // CFG.include_prefix = "cloudchamber";
+    CFG.doxygen = true;
 
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let headers = Path::new(&out_dir).join("headers");
@@ -17,26 +18,20 @@ fn main() {
 
     println!("cargo:rerun-if-changed=include/tracing.h");
 
-    #[cfg(debug_assertions)]
-    {
-        let tests = cloudchanber.join("tests");
-        fs::create_dir_all(&tests).unwrap();
-        fs::copy("tests/tests.h", tests.join("tests.h")).unwrap();
-        println!("cargo:rerun-if-changed=tests/tests.h");
-    }
-
     let sources = vec!["src/lib.rs"];
 
-    let mut cpp_sources = vec!["src/lib.cc"];
+    let cpp_sources = vec!["src/lib.cc"];
 
-    #[cfg(debug_assertions)]
-    cpp_sources.push("tests/tests.cc");
+    println!("cargo:rerun-if-changed=src/lib.h");
 
     let mut cxx = cxx_build::bridges(&sources);
     cxx.cpp(true)
         .std("c++17")
-        .flag_if_supported("/Zc:__cplusplus")
-        .flag_if_supported("-U_FORTIFY_SOURCE");
+        .flag_if_supported("/Zc:__cplusplus");
+
+    if env::var_os("DEBUG").as_deref() != Some("true".as_ref()) {
+        cxx.flag_if_supported("-Og");
+    }
 
     for file in sources {
         println!("cargo:rerun-if-changed={file}");
