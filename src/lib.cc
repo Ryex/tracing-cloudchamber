@@ -106,7 +106,7 @@ rust::String const &FieldValue::get_string() const noexcept {
   return _string;
 }
 rust::String const &FieldValue::get_str() const noexcept {
-  _string = rust::String::lossy(cast<std::string_view>().cbegin());
+  _string = rust::String::lossy(cast<std::string_view>().data());
   return _string;
 }
 

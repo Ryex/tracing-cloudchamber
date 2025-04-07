@@ -207,7 +207,7 @@ auto new_span0(Args &&...args)
       ::rust::Str(name),                                                       \
       ::rust::Str(                                                             \
           ::cloudchamber::detail::__QUALIFIED_FUNCTION(__PRETTY_FUNCTION__)    \
-              .cbegin()),                                                      \
+              .data()),                                                        \
       level,                                                                   \
       ::rust::Str(__FILE__),                                                   \
       int32_t(__LINE__),                                                       \
