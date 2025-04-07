@@ -76,134 +76,143 @@ auto new_span0(Args &&...args)
 #define __PRETTY_FUNCTION__ __FUNCSIG__
 #endif
 
-#define _TCC_TOKENPASTE2(x, y) x##y
-#define _TCC_TOKENPASTE(x, y) _TCC_TOKENPASTE2(x, y)
+#define __TCC_TOKENPASTE2(x, y) x##y
+#define __TCC_TOKENPASTE(x, y) __TCC_TOKENPASTE2(x, y)
+#define __TCC_CALL(X, Y) X Y
+#define __TCC_EXPAND(...) __VA_ARGS__
 
-#define _TCC_GET_ARG_0(...)
-#define _TCC_GET_ARG_1(N, ...) N
-#define _TCC_GET_ARG_2(_1, N, ...) N
-#define _TCC_GET_ARG_3(_1, _2, N, ...) N
-#define _TCC_GET_ARG_4(_1, _2, _3, N, ...) N
-#define _TCC_GET_ARG_5(_1, _2, _3, _4, N, ...) N
-#define _TCC_GET_ARG_6(_1, _2, _3, _4, _5, N, ...) N
-#define _TCC_GET_ARG_7(_1, _2, _3, _4, _5, _6, N, ...) N
-#define _TCC_GET_ARG_8(_1, _2, _3, _4, _5, _6, _7, N, ...) N
-#define _TCC_GET_ARG_9(_1, _2, _3, _4, _5, _6, _7, _8, N, ...) N
-#define _TCC_GET_ARG_10(_1, _2, _3, _4, _5, _6, _7, _8, _9, N, ...) N
-#define _TCC_GET_ARG_11(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, N, ...) N
-#define _TCC_GET_ARG_12(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, N, ...) N
-#define _TCC_GET_ARG_13(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12, N,  \
-                        ...)                                                   \
+#define __TCC_GET_ARG_0(...)
+#define __TCC_GET_ARG_1(N, ...) N
+#define __TCC_GET_ARG_2(x1, N, ...) N
+#define __TCC_GET_ARG_3(x1, x2, N, ...) N
+#define __TCC_GET_ARG_4(x1, x2, x3, N, ...) N
+#define __TCC_GET_ARG_5(x1, x2, x3, x4, N, ...) N
+#define __TCC_GET_ARG_6(x1, x2, x3, x4, x5, N, ...) N
+#define __TCC_GET_ARG_7(x1, x2, x3, x4, x5, x6, N, ...) N
+#define __TCC_GET_ARG_8(x1, x2, x3, x4, x5, x6, x7, N, ...) N
+#define __TCC_GET_ARG_9(x1, x2, x3, x4, x5, x6, x7, x8, N, ...) N
+#define __TCC_GET_ARG_10(x1, x2, x3, x4, x5, x6, x7, x8, x9, N, ...) N
+#define __TCC_GET_ARG_11(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, N, ...) N
+#define __TCC_GET_ARG_12(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, N, ...) N
+#define __TCC_GET_ARG_13(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12, N, \
+                         ...)                                                  \
   N
-#define _TCC_GET_ARG_14(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12,     \
-                        _13, N, ...)                                           \
+#define __TCC_GET_ARG_14(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12,    \
+                         x13, N, ...)                                          \
   N
-#define _TCC_GET_ARG_15(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12,     \
-                        _13, _14, N, ...)                                      \
+#define __TCC_GET_ARG_15(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12,    \
+                         x13, x14, N, ...)                                     \
   N
-#define _TCC_GET_ARG_16(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12,     \
-                        _13, _14, _15, N, ...)                                 \
+#define __TCC_GET_ARG_16(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12,    \
+                         x13, x14, x15, N, ...)                                \
   N
-#define _TCC_GET_ARG_17(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11, _12,     \
-                        _13, _14, _15, _17, N, ...)                            \
+#define __TCC_GET_ARG_17(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, x12,    \
+                         x13, x14, x15, x17, N, ...)                           \
   N
-#define _TCC_GET_ARG_N(N, ...) _TCC_TOKENPASTE(_TCC_GET_ARG_, N)(__VA_ARGS__)
-#define _TCC_COUNT_VARARGS(...)                                                \
-  _TCC_GET_ARG_17("ignored", __VA_ARGS__, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6,  \
-                  5, 4, 3, 2, 1, 0)
+#define __TCC_GET_ARG_N(N, ...)                                                \
+  __TCC_CALL(__TCC_TOKENPASTE(__TCC_GET_ARG_, N), (__VA_ARGS__))
+#define __TCC_COUNT_VARARGS(...)                                               \
+  __TCC_EXPAND(__TCC_GET_ARG_17("ignored", __VA_ARGS__, 15, 14, 13, 12, 11,    \
+                                10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0))
 
-#define _TCC_GET_PAIR_0(...)
-#define _TCC_GET_PAIR_1(A, ...) A, __GET_ARG_N(1, ##__VA_ARGS__)
-#define _TCC_GET_PAIR_2(_1, _2, A, ...) A, __GET_ARG_N(1, ##__VA_ARGS__)
-#define _TCC_GET_PAIR_3(_1, _2, _3, _4, A, ...) A, __GET_ARG_N(1, ##__VA_ARGS__)
-#define _TCC_GET_PAIR_4(_1, _2, _3, _4, _5, _6, A, ...)                        \
-  A, __GET_ARG_N(1, ##__VA_ARGS__)
-#define _TCC_GET_PAIR_5(_1, _2, _3, _4, _5, _6, _7, _8, A, ...)                \
-  A, __GET_ARG_N(1, ##__VA_ARGS__)
-#define _TCC_GET_PAIR_N(N, ...) _TCC_TOKENPASTE(_TCC_GET_PAIR_, N)(__VA_ARGS__)
-#define _TCC_COUNT_VARARGS_PAIRS(...)                                          \
-  _TCC_GET_ARG_17("ignored", __VA_ARGS__, 7, 7, 6, 6, 5, 5, 4, 4, 3, 3, 2, 2,  \
-                  1, 1, 0, 0)
+#define __TCC_GET_PAIR_0(...)
+#define __TCC_GET_PAIR_1(A, ...) A, __TCC_EXPAND(__GET_ARG_N(1, __VA_ARGS__))
+#define __TCC_GET_PAIR_2(x1, x2, A, ...)                                       \
+  A, __TCC_EXPAND(__GET_ARG_N(1, __VA_ARGS__))
+#define __TCC_GET_PAIR_3(x1, x2, x3, x4, A, ...)                               \
+  A, __TCC_EXPAND(__GET_ARG_N(1, __VA_ARGS__))
+#define __TCC_GET_PAIR_4(x1, x2, x3, x4, x5, x6, A, ...)                       \
+  A, __TCC_EXPAND(__GET_ARG_N(1, __VA_ARGS__))
+#define __TCC_GET_PAIR_5(x1, x2, x3, x4, x5, x6, x7, x8, A, ...)               \
+  A, __TCC_EXPAND(__GET_ARG_N(1, __VA_ARGS__))
+#define __TCC_GET_PAIR_N(N, ...)                                               \
+  __TCC_CALL(__TCC_TOKENPASTE(__TCC_GET_PAIR_, N), (__VA_ARGS__))
+#define __TCC_COUNT_VARARGS_PAIRS(...)                                         \
+  __TCC_EXPAND(__TCC_GET_ARG_17("ignored", __VA_ARGS__, 7, 7, 6, 6, 5, 5, 4,   \
+                                4, 3, 3, 2, 2, 1, 1, 0, 0))
 
-#define _TCC_GET_PAIRS_FIRST_1(_1, _2) _1
-#define _TCC_GET_PAIRS_FIRST_2(_1, _2, _3, _4) _1, _3
-#define _TCC_GET_PAIRS_FIRST_3(_1, _2, _3, _4, _5, _6) _1, _3, _5
-#define _TCC_GET_PAIRS_FIRST_4(_1, _2, _3, _4, _5, _6, _7, _8) _1, _3, _5, _7
-#define _TCC_GET_PAIRS_FIRST_5(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10)        \
-  _1, _3, _5, _7, _9
-#define _TCC_GET_PAIRS_FIRST_6(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11,   \
-                               _12)                                            \
-  _1, _3, _5, _7, _9, _11
-#define _TCC_GET_PAIRS_FIRST_7(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11,   \
-                               _12, _13, _14)                                  \
-  _1, _3, _5, _7, _9, _11, _13
-#define _TCC_GET_PAIRS_FIRST_N(N, ...)                                         \
-  _TCC_TOKENPASTE(_TCC_GET_PAIRS_FIRST_, N)(__VA_ARGS__)
-#define _TCC_GET_PAIRS_FIRST(...)                                              \
-  _TCC_GET_PAIRS_FIRST_N(_TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__), __VA_ARGS__)
+#define __TCC_GET_PAIRS_FIRST_1(x1, x2) x1
+#define __TCC_GET_PAIRS_FIRST_2(x1, x2, x3, x4) x1, x3
+#define __TCC_GET_PAIRS_FIRST_3(x1, x2, x3, x4, x5, x6) x1, x3, x5
+#define __TCC_GET_PAIRS_FIRST_4(x1, x2, x3, x4, x5, x6, x7, x8) x1, x3, x5, x7
+#define __TCC_GET_PAIRS_FIRST_5(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)       \
+  x1, x3, x5, x7, x9
+#define __TCC_GET_PAIRS_FIRST_6(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11,  \
+                                x12)                                           \
+  x1, x3, x5, x7, x9, x11
+#define __TCC_GET_PAIRS_FIRST_7(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11,  \
+                                x12, x13, x14)                                 \
+  x1, x3, x5, x7, x9, x11, x13
+#define __TCC_GET_PAIRS_FIRST_N(N, ...)                                        \
+  __TCC_CALL(__TCC_TOKENPASTE(__TCC_GET_PAIRS_FIRST_, N), (__VA_ARGS__))
+#define __TCC_GET_PAIRS_FIRST(...)                                             \
+  __TCC_EXPAND(__TCC_GET_PAIRS_FIRST_N(__TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__), \
+                                       __VA_ARGS__))
 
-#define _TCC_GET_PAIRS_SECOND_1(_1, _2) _2
-#define _TCC_GET_PAIRS_SECOND_2(_1, _2, _3, _4) _2, _4
-#define _TCC_GET_PAIRS_SECOND_3(_1, _2, _3, _4, _5, _6) _2, _4, _6
-#define _TCC_GET_PAIRS_SECOND_4(_1, _2, _3, _4, _5, _6, _7, _8) _2, _4, _6, _8
-#define _TCC_GET_PAIRS_SECOND_5(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10)       \
-  _2, _4, _6, _8, _10
-#define _TCC_GET_PAIRS_SECOND_6(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11,  \
-                                _12)                                           \
-  _2, _4, _6, _8, _10, _12
-#define _TCC_GET_PAIRS_SECOND_7(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10, _11,  \
-                                _12, _13, _14)                                 \
-  _2, _4, _6, _8, _10, _12, _14
-#define _TCC_GET_PAIRS_SECOND_N(N, ...)                                        \
-  _TCC_TOKENPASTE(_TCC_GET_PAIRS_SECOND_, N)(__VA_ARGS__)
-#define _TCC_GET_PAIRS_SECOND(...)                                             \
-  _TCC_GET_PAIRS_SECOND_N(_TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__), __VA_ARGS__)
+#define __TCC_GET_PAIRS_SECOND_1(x1, x2) x2
+#define __TCC_GET_PAIRS_SECOND_2(x1, x2, x3, x4) x2, x4
+#define __TCC_GET_PAIRS_SECOND_3(x1, x2, x3, x4, x5, x6) x2, x4, x6
+#define __TCC_GET_PAIRS_SECOND_4(x1, x2, x3, x4, x5, x6, x7, x8) x2, x4, x6, x8
+#define __TCC_GET_PAIRS_SECOND_5(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10)      \
+  x2, x4, x6, x8, x10
+#define __TCC_GET_PAIRS_SECOND_6(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, \
+                                 x12)                                          \
+  x2, x4, x6, x8, x10, x12
+#define __TCC_GET_PAIRS_SECOND_7(x1, x2, x3, x4, x5, x6, x7, x8, x9, x10, x11, \
+                                 x12, x13, x14)                                \
+  x2, x4, x6, x8, x10, x12, x14
+#define __TCC_GET_PAIRS_SECOND_N(N, ...)                                       \
+  __TCC_CALL(__TCC_TOKENPASTE(__TCC_GET_PAIRS_SECOND_, N), (__VA_ARGS__))
+#define __TCC_GET_PAIRS_SECOND(...)                                            \
+  __TCC_EXPAND(__TCC_GET_PAIRS_SECOND_N(                                       \
+      __TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__), __VA_ARGS__))
 
-#define _TCC_LIST_WRAP_0(CALL)
-#define _TCC_LIST_WRAP_1(CALL, VAR) CALL(VAR)
-#define _TCC_LIST_WRAP_2(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_1(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_3(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_2(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_4(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_3(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_5(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_4(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_6(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_5(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_7(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_6(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_8(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_7(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_9(CALL, VAR, ...)                                       \
-  CALL(VAR), _TCC_LIST_WRAP_8(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_10(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_9(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_11(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_10(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_12(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_11(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_13(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_12(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_14(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_13(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_15(CALL, VAR, ...)                                      \
-  CALL(VAR), _TCC_LIST_WRAP_14(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP_N(N, CALL, ...)                                         \
-  _TCC_TOKENPASTE(_TCC_LIST_WRAP_, N)(CALL, __VA_ARGS__)
-#define _TCC_LIST_WRAP(CALL, ...)                                              \
-  _TCC_LIST_WRAP_N(_TCC_COUNT_VARARGS(__VA_ARGS__), CALL, __VA_ARGS__)
+#define __TCC_LIST_WRAP_0(macro)
+#define __TCC_LIST_WRAP_1(macro, VAR) macro(VAR)
+#define __TCC_LIST_WRAP_2(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_1(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_3(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_2(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_4(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_3(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_5(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_4(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_6(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_5(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_7(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_6(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_8(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_7(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_9(macro, VAR, ...)                                     \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_8(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_10(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_9(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_11(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_10(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_12(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_11(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_13(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_12(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_14(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_13(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_15(macro, VAR, ...)                                    \
+  macro(VAR), __TCC_EXPAND(__TCC_LIST_WRAP_14(macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP_N(N, macro, ...)                                       \
+  __TCC_CALL(__TCC_TOKENPASTE(__TCC_LIST_WRAP_, N), (macro, __VA_ARGS__))
+#define __TCC_LIST_WRAP(macro, ...)                                            \
+  __TCC_LIST_WRAP_N(__TCC_EXPAND(__TCC_COUNT_VARARGS(__VA_ARGS__)), macro,     \
+                    __VA_ARGS__)
 
-#define _TCC_STR(x) _TCC_XSTR(x)
-#define _TCC_XSTR(x) #x
+#define __TCC_STR(x) __TCC_XSTR(x)
+#define __TCC_XSTR(x) #x
 
-#define _tcc_event_name() "event " _TCC_STR(__FILE__) ":" _TCC_STR(__LINE__)
+#define _tcc_event_name() "event " __TCC_STR(__FILE__) ":" __TCC_STR(__LINE__)
 
 #define _tcc_callsite(callsite, level, name, kind)                             \
-  static const ::cloudchamber::Callsite _TCC_TOKENPASTE(callsite,              \
-                                                        __LINE__) = {};        \
-  static const ::cloudchamber::Metadata _TCC_TOKENPASTE(                       \
-      _TCC_TOKENPASTE(callsite, _META), __LINE__){                             \
+  static const ::cloudchamber::Callsite __TCC_TOKENPASTE(callsite,             \
+                                                         __LINE__) = {};       \
+  static const ::cloudchamber::Metadata __TCC_TOKENPASTE(                      \
+      __TCC_TOKENPASTE(callsite, _META), __LINE__){                            \
       ::rust::Str(name),                                                       \
       ::rust::Str(                                                             \
           ::cloudchamber::detail::__QUALIFIED_FUNCTION(__PRETTY_FUNCTION__)    \
@@ -212,85 +221,85 @@ auto new_span0(Args &&...args)
       ::rust::Str(__FILE__),                                                   \
       int32_t(__LINE__),                                                       \
       ::rust::Slice<const ::rust::Str>(                                        \
-          _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _FIELDS), __LINE__)),      \
-      _TCC_TOKENPASTE(callsite, __LINE__),                                     \
+          __TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _FIELDS), __LINE__)),    \
+      __TCC_TOKENPASTE(callsite, __LINE__),                                    \
       ::cloudchamber::Kind{::cloudchamber::detail::KindValue::kind}};          \
-  _TCC_TOKENPASTE(callsite, __LINE__)                                          \
+  __TCC_TOKENPASTE(callsite, __LINE__)                                         \
       .set_metadata_ptr(                                                       \
-          &_TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _META), __LINE__));       \
-  bool _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _ENABLED), __LINE__) =        \
+          &__TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _META), __LINE__));     \
+  bool __TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _ENABLED), __LINE__) =      \
       level.is_enabled();                                                      \
-  if (_TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _ENABLED), __LINE__)) {        \
-    _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _ENABLED), __LINE__) =           \
-        _TCC_TOKENPASTE(callsite, __LINE__).is_enabled();                      \
+  if (__TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _ENABLED), __LINE__)) {      \
+    __TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _ENABLED), __LINE__) =         \
+        __TCC_TOKENPASTE(callsite, __LINE__).is_enabled();                     \
   }
 
 #define tcc_callsite_f(callsite, level, name, kind, ...)                       \
-  static const std::array<::rust::Str, _TCC_COUNT_VARARGS(__VA_ARGS__)>        \
-      _TCC_TOKENPASTE(_TCC_TOKENPASTE(callsite, _FIELDS),                      \
-                      __LINE__) = {_TCC_LIST_WRAP(_TCC_STR, __VA_ARGS__)};     \
+  static const std::array<::rust::Str, __TCC_COUNT_VARARGS(__VA_ARGS__)>       \
+      __TCC_TOKENPASTE(__TCC_TOKENPASTE(callsite, _FIELDS), __LINE__) = {      \
+          __TCC_EXPAND(__TCC_LIST_WRAP(__TCC_STR, __VA_ARGS__))};              \
   _tcc_callsite(callsite, level, name, kind)
 
 #define tcc_callsite(callsite, level, name, kind)                              \
-  static const std::array<::rust::Str, 0> _TCC_TOKENPASTE(                     \
-      _TCC_TOKENPASTE(callsite, _FIELDS), __LINE__) = {};                      \
+  static const std::array<::rust::Str, 0> __TCC_TOKENPASTE(                    \
+      __TCC_TOKENPASTE(callsite, _FIELDS), __LINE__) = {};                     \
   _tcc_callsite(callsite, level, name, kind)
 
 #define tcc_named_event(level, name)                                           \
   tcc_callsite(__CALLSITE, level, name, EVENT);                                \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
     ::cloudchamber::dispatch_tracing_event(                                    \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());                     \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());                    \
   }
 
 #define tcc_named_event_f(level, name, ...)                                    \
   tcc_callsite_f(__CALLSITE, level, name, EVENT, __VA_ARGS__);                 \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
-    _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
-                    _TCC_COUNT_VARARGS(__VA_ARGS__))(                          \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
-        _TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__));              \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
+    __TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                   \
+                     __TCC_COUNT_VARARGS(__VA_ARGS__))(                        \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                     \
+        __TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__));             \
   }
 
 #define tcc_named_event_p(level, name, ...)                                    \
   tcc_callsite_f(__CALLSITE, level, name, EVENT,                               \
-                 _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
-    _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
-                    _TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__))(                    \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
-        _TCC_LIST_WRAP(::cloudchamber::FieldValue,                             \
-                       _TCC_GET_PAIRS_SECOND(__VA_ARGS__)));                   \
+                 __TCC_GET_PAIRS_FIRST(__VA_ARGS__));                          \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
+    __TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                   \
+                     __TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__))(                  \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                     \
+        __TCC_LIST_WRAP(::cloudchamber::FieldValue,                            \
+                        __TCC_GET_PAIRS_SECOND(__VA_ARGS__)));                 \
   }
 
 #define tcc_named_event_msg(level, name, msg)                                  \
   tcc_callsite_f(__CALLSITE, level, name, EVENT, message);                     \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
     ::cloudchamber::dispatch_tracing_event1(                                   \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                     \
         ::cloudchamber::FieldValue(msg));                                      \
   }
 
 #define tcc_named_event_msg_f(level, name, msg, ...)                           \
   tcc_callsite_f(__CALLSITE, level, name, EVENT, message, __VA_ARGS__);        \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
-    _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
-                    _TCC_COUNT_VARARGS(msg, __VA_ARGS__))(                     \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
+    __TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                   \
+                     __TCC_COUNT_VARARGS(msg, __VA_ARGS__))(                   \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                     \
         ::cloudchamber::FieldValue(msg),                                       \
-        _TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__));              \
+        __TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__));             \
   }
 
 #define tcc_named_event_msg_p(level, name, msg, ...)                           \
   tcc_callsite_f(__CALLSITE, level, name, EVENT, message,                      \
-                 _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
-  if (_TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                         \
-    _TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                    \
-                    _TCC_COUNT_VARARGS_PAIRS(message, msg, __VA_ARGS__))(      \
-        _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                      \
+                 __TCC_GET_PAIRS_FIRST(__VA_ARGS__));                          \
+  if (__TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)) {                        \
+    __TCC_TOKENPASTE(::cloudchamber::dispatch_tracing_event,                   \
+                     __TCC_COUNT_VARARGS_PAIRS(message, msg, __VA_ARGS__))(    \
+        __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),                     \
         ::cloudchamber::FieldValue(msg),                                       \
-        _TCC_LIST_WRAP(::cloudchamber::FieldValue,                             \
-                       _TCC_GET_PAIRS_SECOND(__VA_ARGS__)));                   \
+        __TCC_LIST_WRAP(::cloudchamber::FieldValue,                            \
+                        __TCC_GET_PAIRS_SECOND(__VA_ARGS__)));                 \
   }
 
 #define tcc_event(level) tcc_named_event(level, _tcc_event_name())
@@ -389,35 +398,35 @@ auto new_span0(Args &&...args)
 #define tcc_span(ident, level, name)                                           \
   tcc_callsite(__CALLSITE, level, name, SPAN);                                 \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
-      _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
+      __TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                           \
           ? ::cloudchamber::new_span(                                          \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta())              \
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta())             \
           : ::cloudchamber::new_disabled_span(                                 \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
 
 #define tcc_span_f(ident, level, name, ...)                                    \
   tcc_callsite_f(__CALLSITE, level, name, SPAN, __VA_ARGS__);                  \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
-      _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
-          ? _TCC_TOKENPASTE(::cloudchamber::new_span,                          \
-                            _TCC_COUNT_VARARGS(__VA_ARGS__))(                  \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),              \
-                _TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__))       \
+      __TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                           \
+          ? __TCC_TOKENPASTE(::cloudchamber::new_span,                         \
+                             __TCC_COUNT_VARARGS(__VA_ARGS__))(                \
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),             \
+                __TCC_LIST_WRAP(::cloudchamber::FieldValue, __VA_ARGS__))      \
           : ::cloudchamber::new_disabled_span(                                 \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
 
 #define tcc_span_p(ident, level, name, ...)                                    \
   tcc_callsite_f(__CALLSITE, level, name, SPAN,                                \
-                 _TCC_GET_PAIRS_FIRST(__VA_ARGS__));                           \
+                 __TCC_GET_PAIRS_FIRST(__VA_ARGS__));                          \
   ::rust::Box<::cloudchamber::Span> ident =                                    \
-      _TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                            \
-          ? ident = _TCC_TOKENPASTE(::cloudchamber::new_span,                  \
-                                    _TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__))(    \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),              \
-                _TCC_LIST_WRAP(::cloudchamber::FieldValue,                     \
-                               _TCC_GET_PAIRS_SECOND(__VA_ARGS__)))            \
+      __TCC_TOKENPASTE(__CALLSITE_ENABLED, __LINE__)                           \
+          ? ident = __TCC_TOKENPASTE(::cloudchamber::new_span,                 \
+                                     __TCC_COUNT_VARARGS_PAIRS(__VA_ARGS__))(  \
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta(),             \
+                __TCC_LIST_WRAP(::cloudchamber::FieldValue,                    \
+                                __TCC_GET_PAIRS_SECOND(__VA_ARGS__)))          \
           : ::cloudchamber::new_disabled_span(                                 \
-                _TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
+                __TCC_TOKENPASTE(__CALLSITE, __LINE__).get_meta());
 
 #define tcc_error_span(ident, name)                                            \
   tcc_span(ident, ::cloudchamber::level::ERROR, name)
