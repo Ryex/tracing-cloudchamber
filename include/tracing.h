@@ -11,16 +11,16 @@
 namespace cloudchamber {
 
 namespace level {
-static const Level ERROR = Level{::cloudchamber::detail::LevelValue::ERROR};
-static const Level WARN = Level{::cloudchamber::detail::LevelValue::WARN};
-static const Level INFO = Level{::cloudchamber::detail::LevelValue::INFO};
-static const Level DEBUG = Level{::cloudchamber::detail::LevelValue::DEBUG};
-static const Level TRACE = Level{::cloudchamber::detail::LevelValue::TRACE};
+const Level ERROR = Level{::cloudchamber::detail::LevelValue::ERROR};
+const Level WARN = Level{::cloudchamber::detail::LevelValue::WARN};
+const Level INFO = Level{::cloudchamber::detail::LevelValue::INFO};
+const Level DEBUG = Level{::cloudchamber::detail::LevelValue::DEBUG};
+const Level TRACE = Level{::cloudchamber::detail::LevelValue::TRACE};
 } // namespace level
 namespace kind {
-static const Kind EVENT = Kind{::cloudchamber::detail::KindValue::EVENT};
-static const Kind SPAN = Kind{::cloudchamber::detail::KindValue::SPAN};
-static const Kind HINT = Kind{::cloudchamber::detail::KindValue::HINT};
+const Kind EVENT = Kind{::cloudchamber::detail::KindValue::EVENT};
+const Kind SPAN = Kind{::cloudchamber::detail::KindValue::SPAN};
+const Kind HINT = Kind{::cloudchamber::detail::KindValue::HINT};
 } // namespace kind
 
 namespace detail {

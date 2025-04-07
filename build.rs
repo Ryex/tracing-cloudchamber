@@ -27,7 +27,8 @@ fn main() {
     let mut cxx = cxx_build::bridges(&sources);
     cxx.cpp(true)
         .std("c++17")
-        .flag_if_supported("/Zc:__cplusplus");
+        .flag_if_supported("/Zc:__cplusplus")
+        .flag_if_supported("/EHsc");
 
     if env::var_os("DEBUG").as_deref() != Some("true".as_ref()) {
         cxx.flag_if_supported("-Og");

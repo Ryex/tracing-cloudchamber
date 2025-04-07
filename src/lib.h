@@ -1,5 +1,8 @@
 #pragma once
 
+#ifndef TRACING_CLOUDCHAMBER_LIB_H
+#define TRACING_CLOUDCHAMBER_LIB_H
+
 #include <atomic>
 #include <functional>
 #include <map>
@@ -339,3 +342,5 @@ private:
 };
 
 } // namespace cloudchamber
+
+#endif
