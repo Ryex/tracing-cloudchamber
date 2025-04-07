@@ -212,6 +212,22 @@ The `tcc_span_<...>(ident, ...)` span macros expand to a call-site and a Boxed `
 ::rust::Box<::cloudchamber::Span> ident = /* span construction dependant on call-site enable */
 ```
 
+#### Span::in_scope
+
+Due to how `cxx` currently restricts `ffi` `in_scope` can't accept a generic `std::function<>`.
+Instead you must wrap the function with a `::cloudchamber::ScopeLambda`
+
+```cpp
+std::array an_array = {"an", "array", "of", "strings"};
+std::map<std::string, int> answers{
+    {"life", 42}, {"universe", 42}, {"everything", 42}};
+tcc_trace_span_f(_t_span, "a_trace_span", an_array, answers);
+
+_t_span->in_scope(::cloudchamber::ScopeLambda([=]() {
+  tcc_info_msg("in_scope info msg");
+}));
+```
+
 #### Available span macros
 
 ##### Raw Spans
