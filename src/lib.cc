@@ -49,7 +49,7 @@ void Callsite::store_interest(const cloudchamber::Interest &intrst) const {
   interest.store(val, std::memory_order_seq_cst);
 }
 
-const rust::Box<RustMetadata> &Callsite::get_meta() const {
+rust::Box<RustMetadata> const &Callsite::get_meta() const {
   if (!rust_meta.has_value()) {
     rust_meta.emplace(::cloudchamber::new_rust_metadata(*meta));
   }
@@ -74,43 +74,43 @@ void Callsite::set_metadata_ptr(const ::cloudchamber::Metadata *ptr) const {
   meta = ptr;
 }
 
-const std::uint8_t &FieldValue::get_u8() const noexcept {
+std::uint8_t const &FieldValue::get_u8() const noexcept {
   return rcast<std::uint8_t>();
 }
-const std::uint16_t &FieldValue::get_u16() const noexcept {
+std::uint16_t const &FieldValue::get_u16() const noexcept {
   return rcast<std::uint16_t>();
 }
-const std::uint32_t &FieldValue::get_u32() const noexcept {
+std::uint32_t const &FieldValue::get_u32() const noexcept {
   return rcast<std::uint32_t>();
 }
-const std::uint64_t &FieldValue::get_u64() const noexcept {
+std::uint64_t const &FieldValue::get_u64() const noexcept {
   return rcast<std::uint64_t>();
 }
-const std::int8_t &FieldValue::get_i8() const noexcept {
+std::int8_t const &FieldValue::get_i8() const noexcept {
   return rcast<std::int8_t>();
 }
-const std::int16_t &FieldValue::get_i16() const noexcept {
+std::int16_t const &FieldValue::get_i16() const noexcept {
   return rcast<std::int16_t>();
 }
-const std::int32_t &FieldValue::get_i32() const noexcept {
+std::int32_t const &FieldValue::get_i32() const noexcept {
   return rcast<std::int32_t>();
 }
-const std::int64_t &FieldValue::get_i64() const noexcept {
+std::int64_t const &FieldValue::get_i64() const noexcept {
   return rcast<std::int64_t>();
 }
-const float &FieldValue::get_f32() const noexcept { return rcast<float>(); }
-const double &FieldValue::get_f64() const noexcept { return rcast<double>(); }
-const bool &FieldValue::get_bool() const noexcept { return rcast<bool>(); }
-const rust::String &FieldValue::get_string() const noexcept {
+float const &FieldValue::get_f32() const noexcept { return rcast<float>(); }
+double const &FieldValue::get_f64() const noexcept { return rcast<double>(); }
+bool const &FieldValue::get_bool() const noexcept { return rcast<bool>(); }
+rust::String const &FieldValue::get_string() const noexcept {
   _string = ::rust::String::lossy(cast<std::string>());
   return _string;
 }
-const rust::String &FieldValue::get_str() const noexcept {
+rust::String const &FieldValue::get_str() const noexcept {
   _string = rust::String::lossy(cast<std::string_view>().cbegin());
   return _string;
 }
 
-const rust::Box<DisplayValue> &FieldValue::get_debug() const {
+rust::Box<DisplayValue> const &FieldValue::get_debug() const {
   if (debug_formater != nullptr) {
     _display.emplace(::cloudchamber::string_to_display_value(debug_formater()));
     return _display.value();

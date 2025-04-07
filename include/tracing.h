@@ -3,13 +3,8 @@
 #ifndef TRACING_CLOUDCHAMBER_H
 #define TRACING_CLOUDCHAMBER_H
 
-#include <functional>
-#include <iostream>
-#include <memory>
 #include <string_view>
-#include <type_traits>
 #include <utility>
-#include <vector>
 
 #include "tracing-cloudchamber/src/lib.rs.h"
 

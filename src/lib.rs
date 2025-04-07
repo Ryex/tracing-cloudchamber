@@ -1,3 +1,5 @@
+#![allow(clippy::needless_lifetimes)]
+
 #[cxx::bridge(namespace = "cloudchamber")]
 pub mod ffi {
 

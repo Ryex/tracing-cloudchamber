@@ -2,7 +2,6 @@
 
 #include <atomic>
 #include <functional>
-#include <iomanip>
 #include <map>
 #include <memory>
 #include <optional>
@@ -12,26 +11,6 @@
 #include <type_traits>
 
 #include "rust/cxx.h"
-
-namespace cloudchamber {
-namespace detail {
-
-template <typename... Args>
-inline std::string string_format(const std::string &format, Args... args) {
-  int size_s = std::snprintf(nullptr, 0, format.c_str(), args...) +
-               1; // Extra space for '\0'
-  if (size_s <= 0) {
-    throw std::runtime_error("Error during formatting.");
-  }
-  auto size = static_cast<size_t>(size_s);
-  std::unique_ptr<char[]> buf(new char[size]);
-  std::snprintf(buf.get(), size, format.c_str(), args...);
-  return std::string(buf.get(),
-                     buf.get() + size - 1); // We don't want the '\0' inside
-}
-
-} // namespace detail
-} // namespace cloudchamber
 
 namespace cloudchamber {
 
@@ -62,7 +41,7 @@ const uint8_t INTEREST_EMPTY(0xFF);
 struct Callsite {
   mutable std::atomic_uint8_t interest;
   mutable std::atomic_uint8_t registration;
-  mutable const ::cloudchamber::Metadata *meta;
+  mutable ::cloudchamber::Metadata const *meta;
   mutable std::optional<rust::Box<RustMetadata>> rust_meta;
 
   Callsite()
@@ -76,9 +55,9 @@ struct Callsite {
   /**
    * @brief Get the metadata used by tracing
    */
-  const rust::Box<RustMetadata> &get_meta() const;
+  rust::Box<RustMetadata> const &get_meta() const;
   bool is_enabled() const;
-  void set_metadata_ptr(const ::cloudchamber::Metadata *ptr) const;
+  void set_metadata_ptr(::cloudchamber::Metadata const *ptr) const;
 };
 
 namespace detail {
@@ -99,7 +78,7 @@ public:
     auto typed_container = std::static_pointer_cast<const Model<T>>(container);
     return typed_container->m_data;
   }
-  template <typename T> const T &rcast() const {
+  template <typename T> T const &rcast() const {
     auto typed_container = std::static_pointer_cast<const Model<T>>(container);
     return typed_container->m_data;
   }
@@ -214,11 +193,11 @@ template <> std::string toString(std::string_view const &s);
 std::string toString(const char *s);
 } // namespace util
 
-template <typename T> std::string field_format(const T &value) {
+template <typename T> std::string field_format(T const &value) {
   return ::cloudchamber::util::toString(value);
 }
 
-template <typename T> std::string field_format(const std::vector<T> &value) {
+template <typename T> std::string field_format(std::vector<T> const &value) {
   std::ostringstream out;
   out << "std::vector[";
   const std::size_t size = value.size();
@@ -233,7 +212,7 @@ template <typename T> std::string field_format(const std::vector<T> &value) {
 }
 
 template <std::size_t N, typename T>
-std::string field_format(const std::array<T, N> &value) {
+std::string field_format(std::array<T, N> const &value) {
   std::ostringstream out;
   out << "std::array<" << N << ">[";
   for (std::size_t i = 0; i < N; ++i) {
@@ -247,7 +226,7 @@ std::string field_format(const std::array<T, N> &value) {
 }
 
 template <typename K, typename V>
-std::string field_format(const std::map<K, V> &value) {
+std::string field_format(std::map<K, V> const &value) {
   std::ostringstream out;
   out << "std::map{";
   std::size_t index = 0;
@@ -324,20 +303,20 @@ struct FieldValue : public ::cloudchamber::detail::FieldTrait {
 
   ::cloudchamber::detail::FieldValueKind get_type() const { return _tag; }
 
-  const std::uint8_t &get_u8() const noexcept;
-  const std::uint16_t &get_u16() const noexcept;
-  const std::uint32_t &get_u32() const noexcept;
-  const std::uint64_t &get_u64() const noexcept;
-  const std::int8_t &get_i8() const noexcept;
-  const std::int16_t &get_i16() const noexcept;
-  const std::int32_t &get_i32() const noexcept;
-  const std::int64_t &get_i64() const noexcept;
-  const float &get_f32() const noexcept;
-  const double &get_f64() const noexcept;
-  const bool &get_bool() const noexcept;
-  const rust::String &get_string() const noexcept;
-  const rust::String &get_str() const noexcept;
-  const rust::Box<::cloudchamber::DisplayValue> &get_debug() const;
+  std::uint8_t const &get_u8() const noexcept;
+  std::uint16_t const &get_u16() const noexcept;
+  std::uint32_t const &get_u32() const noexcept;
+  std::uint64_t const &get_u64() const noexcept;
+  std::int8_t const &get_i8() const noexcept;
+  std::int16_t const &get_i16() const noexcept;
+  std::int32_t const &get_i32() const noexcept;
+  std::int64_t const &get_i64() const noexcept;
+  float const &get_f32() const noexcept;
+  double const &get_f64() const noexcept;
+  bool const &get_bool() const noexcept;
+  rust::String const &get_string() const noexcept;
+  rust::String const &get_str() const noexcept;
+  rust::Box<::cloudchamber::DisplayValue> const &get_debug() const;
 
 private:
   ::cloudchamber::detail::FieldValueKind _tag;
